@@ -1,0 +1,8 @@
+# dev requirements, prod requirements are found in setup.py
+#
+
+fabric
+
+# testing tools
+pytest
+coverage
