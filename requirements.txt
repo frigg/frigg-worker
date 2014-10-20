@@ -2,6 +2,7 @@
 #
 
 fabric
+pyyaml
 
 # testing tools
 pytest
