@@ -31,8 +31,8 @@ def _detect_test_runners(files):
 def test__detect_test_runners():
     assert(_detect_test_runners([]) == [])
     assert(_detect_test_runners(['random file']) == [])
-    files = ['_config.yml', 'Cargo.toml', 'build.sbt', 'package.json', 'manage.py', 'setup.py', 'tox.ini',
-             'Makefile']
+    files = ['_config.yml', 'Cargo.toml', 'build.sbt', 'package.json', 'manage.py', 'setup.py',
+             'tox.ini', 'Makefile']
     assert(_detect_test_runners(files) == ['make test'])
     del files[len(files) - 1]
     assert(_detect_test_runners(files) == ['tox', 'flake8'])

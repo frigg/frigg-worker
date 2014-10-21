@@ -4,6 +4,7 @@ import yaml
 
 import redis
 
+
 def config(key):
     settings = yaml.load(open(os.path.join(os.path.dirname(__file__), 'defaults.yaml')))
     try:
