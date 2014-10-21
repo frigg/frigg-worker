@@ -23,12 +23,15 @@ def _detect_test_runners(files):
         return ['sbt test']
     if 'Cargo.toml' in files:
         return ['cargo test']
+    if '_config.yml' in files:
+        return ['jekyll build']
     return []
 
 
 def test__detect_test_runners():
     assert(_detect_test_runners([]) == [])
-    files = ['Cargo.toml', 'build.sbt', 'package.json', 'manage.py', 'setup.py', 'tox.ini',
+    assert(_detect_test_runners(['random file']) == [])
+    files = ['_config.yml', 'Cargo.toml', 'build.sbt', 'package.json', 'manage.py', 'setup.py', 'tox.ini',
              'Makefile']
     assert(_detect_test_runners(files) == ['make test'])
     del files[len(files) - 1]
@@ -43,6 +46,8 @@ def test__detect_test_runners():
     assert(_detect_test_runners(files) == ['sbt test'])
     del files[len(files) - 1]
     assert(_detect_test_runners(files) == ['cargo test'])
+    del files[len(files) - 1]
+    assert(_detect_test_runners(files) == ['jekyll build'])
 
 
 def _list_files(path):
