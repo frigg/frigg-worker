@@ -3,6 +3,7 @@
 
 fabric
 pyyaml
+redis
 
 # testing tools
 pytest
