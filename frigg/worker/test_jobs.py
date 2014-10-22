@@ -26,7 +26,6 @@ class BuildTestCase(unittest.TestCase):
     def test_init(self):
         self.assertEquals(self.build.id, 1)
         self.assertEquals(len(self.build.results), 0)
-        self.assertEquals(self.build.working_directory, DATA['working_directory'])
         self.assertEquals(self.build.branch, DATA['branch'])
         self.assertEquals(self.build.sha, DATA['sha'])
         self.assertEquals(self.build.sha, DATA['sha'])
