@@ -1,5 +1,7 @@
 # -*- coding: utf8 -*-
+import json
 import os
+import requests
 import yaml
 import logging
 import threading
@@ -8,6 +10,7 @@ from fabric.context_managers import settings, lcd
 from fabric.operations import local
 
 from frigg.helpers import detect_test_runners
+from .config import config
 
 logger = logging.getLogger(__name__)
 
@@ -27,15 +30,18 @@ class Result(object):
         if error:
             self.log = error
 
+    @classmethod
+    def serialize(cls, obj):
+        return obj.__dict__
+
 
 class Build(object):
     id = ''
     results = []
     cloned = False
-    working_directory = None
     branch = 'master'
     sha = None
-    repo_url = None
+    clone_url = None
     name = None
     owner = None
     errored = False
@@ -51,8 +57,8 @@ class Build(object):
         return t
 
     @property
-    def project_directory(self):
-        return os.path.dirname(self.working_directory)
+    def working_directory(self):
+        return os.path.join(config('TMP_DIR'), str(self.id))
 
     @property
     def succeeded(self):
@@ -95,14 +101,17 @@ class Build(object):
 
         except AttributeError, e:
             self.error('', e)
+        finally:
+            self.delete_working_dir()
+            logger.info(self.report_run())
 
     def clone_repo(self, depth=1):
-        local("mkdir -p %s" % self.project_directory)
+        local("mkdir -p %s" % os.path.dirname(self.working_directory))
         with settings(warn_only=True):
             clone = local("git clone --depth=%s --branch=%s %s %s" % (
                 depth,
                 self.branch,
-                self.repo_url,
+                self.clone_url,
                 self.working_directory
             ), capture=True)
             if not clone.succeeded:
@@ -123,3 +132,12 @@ class Build(object):
     def error(self, task, message):
         self.results.append(Result(task, error=message))
         self.errored = True
+
+    def report_run(self):
+        return requests.post(config('HQ_REPORT_URL'), json.dumps(self, default=Build.serializer))
+
+    @classmethod
+    def serializer(cls, obj):
+        out = obj.__dict__
+        out['results'] = [Result.serialize(r) for r in obj.results]
+        return out

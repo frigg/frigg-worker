@@ -6,10 +6,9 @@ from .jobs import Build, Result
 
 DATA = {
     'id': 2,
-    'working_directory': 'tests/repo',
     'branch': 'master',
     'sha': 'superbhash',
-    'repo_url': 'git@git.github.com:frigg/test-repo.git',
+    'clone_url': 'https://github.com/frigg/test-repo.git',
     'owner': 'frigg',
     'name': 'test-repo',
 }
@@ -31,7 +30,7 @@ class BuildTestCase(unittest.TestCase):
         self.assertEquals(self.build.branch, DATA['branch'])
         self.assertEquals(self.build.sha, DATA['sha'])
         self.assertEquals(self.build.sha, DATA['sha'])
-        self.assertEquals(self.build.repo_url, DATA['repo_url'])
+        self.assertEquals(self.build.clone_url, DATA['clone_url'])
         self.assertEquals(self.build.owner, DATA['owner'])
         self.assertEquals(self.build.name, DATA['name'])
 

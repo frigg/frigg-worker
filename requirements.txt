@@ -4,6 +4,7 @@
 fabric
 pyyaml
 redis
+requests
 
 # testing tools
 pytest
