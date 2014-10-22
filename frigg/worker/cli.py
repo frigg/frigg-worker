@@ -14,7 +14,8 @@ class Commands(object):
     def unknown_command():
         print(colors.red("Unknown command"))
 
-if __name__ == '__main__':
+
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(description='Do some work for frigg.')
@@ -23,3 +24,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     getattr(Commands, args.command, Commands.unknown_command)()
+
+if __name__ == '__main__':
+    main()
