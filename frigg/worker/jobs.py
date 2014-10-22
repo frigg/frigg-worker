@@ -22,30 +22,22 @@ class Result(object):
         self.task = task
         if result:
             self.succeeded = result.succeeded
-            self.return_code.append(result.return_code)
+            self.return_code = result.return_code
             self.log = result
         if error:
             self.log = error
-
-    def error(self, error):
-        self.log = 'Build errored: %s' % error
-        self.succeeded = False
-
-    def report_task(self, result):
-        self.succeeded = result.succeeded
-        self.return_code.append(result.return_code)
-        self.log = result
 
 
 class Build(object):
     id = ''
     results = []
     cloned = False
-    working_directory = ''
+    working_directory = None
     branch = 'master'
-    clone_url = ''
-    name = ''
-    owner = ''
+    sha = None
+    repo_url = None
+    name = None
+    owner = None
     errored = False
 
     def __init__(self, id, object):
@@ -66,11 +58,11 @@ class Build(object):
     def succeeded(self):
         if self.errored:
             return False
-        return None
 
-    @property
-    def pending(self):
-        return self.succeeded is None
+        for result in self.results:
+            if result.succeeded is False:
+                return False
+        return True
 
     @property
     def settings(self):
@@ -110,7 +102,7 @@ class Build(object):
             clone = local("git clone --depth=%s --branch=%s %s %s" % (
                 depth,
                 self.branch,
-                self.clone_url,
+                self.repo_url,
                 self.working_directory
             ), capture=True)
             if not clone.succeeded:
@@ -130,3 +122,4 @@ class Build(object):
 
     def error(self, task, message):
         self.results.append(Result(task, error=message))
+        self.errored = True
