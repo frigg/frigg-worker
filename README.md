@@ -8,3 +8,14 @@ virtualenv ~/frigg-worker
 ~/frigg-worker/bin/pip install -e git+https://github.com/frigg/frigg-worker.git#egg=frigg-worker
 ~/frigg-worker/bin/frigg-worker start
 ```
+
+### Supervisor config
+```
+[program:frigg-worker]
+directory=/home/frigg/
+command=/home/frigg/frigg-worker/bin/frigg-worker start
+autostart=true
+autorestart=true
+redirect_stderr=true
+user=frigg
+```
