@@ -8,7 +8,7 @@ import redis
 def config(key):
     settings = yaml.load(open(os.path.join(os.path.dirname(__file__), 'defaults.yml')))
     try:
-        settings.update(yaml.load(open('~/.frigg/worker.yaml')))
+        settings.update(yaml.load(open(os.path.expanduser('~/.frigg/worker.yaml'))))
     except IOError:
         pass
     return settings.get(key, None)

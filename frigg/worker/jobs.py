@@ -32,6 +32,8 @@ class Result(object):
 
     @classmethod
     def serialize(cls, obj):
+        if isinstance(obj, dict):
+            return obj
         return obj.__dict__
 
 
