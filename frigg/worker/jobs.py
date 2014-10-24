@@ -136,7 +136,14 @@ class Build(object):
         self.errored = True
 
     def report_run(self):
-        return requests.post(config('HQ_REPORT_URL'), json.dumps(self, default=Build.serializer))
+        return requests.post(
+            config('HQ_REPORT_URL'),
+            json.dumps(self, default=Build.serializer),
+            headers={
+                'content-type': 'application/json',
+                'HTTP_FRIGG_WORKER_TOKEN': config('TOKEN')
+            }
+        )
 
     @classmethod
     def serializer(cls, obj):
