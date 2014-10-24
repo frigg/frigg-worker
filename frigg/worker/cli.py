@@ -1,6 +1,10 @@
 # -*- coding: utf8 -*-
+import os
+import logging.config
+
 from fabric import colors
-from frigg.worker.fetcher import fetcher
+
+from .fetcher import fetcher
 
 
 class Commands(object):
@@ -17,6 +21,11 @@ class Commands(object):
 
 def main():
     import argparse
+
+    try:
+        logging.config.fileConfig(os.path.expanduser('~/.frigg/logging.conf'))
+    except Exception, e:
+        print("There is a problem with the logging config:\n%s" % e)
 
     parser = argparse.ArgumentParser(description='Do some work for frigg.')
     parser.add_argument('command')
