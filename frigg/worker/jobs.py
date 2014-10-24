@@ -105,6 +105,7 @@ class Build(object):
             self.error('', e)
         finally:
             self.delete_working_dir()
+            self.report_run()
             logger.info("Run of build %s finished." % self.id)
 
     def clone_repo(self, depth=1):
@@ -136,16 +137,19 @@ class Build(object):
         self.errored = True
 
     def report_run(self):
-        req = requests.post(
+        response = requests.post(
             config('HQ_REPORT_URL'),
             json.dumps(self, default=Build.serializer),
             headers={
                 'content-type': 'application/json',
-                'HTTP_FRIGG_WORKER_TOKEN': config('TOKEN')
+                'FRIGG_WORKER_TOKEN': config('TOKEN')
             }
         )
-        logger.info('Reported build to hq, hq response status-code: %s' % req.status_code)
-        return req
+        logger.info('Reported build to hq, hq response status-code: %s' % response.status_code)
+        if response.status_code != 200:
+            with open('build-%s-hq-response.html' % self.id, 'w') as f:
+                f.write(response.text)
+        return response
 
     @classmethod
     def serializer(cls, obj):
