@@ -3,6 +3,7 @@ import os
 import yaml
 
 import redis
+from raven import Client
 
 
 def config(key):
@@ -28,3 +29,5 @@ def redis_client():
         db=config('REDIS')['db'],
         password=config('REDIS')['password']
     )
+
+sentry = Client(config('SENTRY_DSN'))

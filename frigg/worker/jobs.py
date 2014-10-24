@@ -10,7 +10,7 @@ from fabric.context_managers import settings, lcd
 from fabric.operations import local
 
 from frigg.helpers import detect_test_runners
-from .config import config
+from .config import config, sentry
 
 logger = logging.getLogger(__name__)
 
@@ -101,8 +101,9 @@ class Build(object):
                     # if one task fails, we do not care about the rest
                     break
 
-        except AttributeError, e:
+        except Exception, e:
             self.error('', e)
+            sentry.captureException()
         finally:
             self.delete_working_dir()
             self.report_run()

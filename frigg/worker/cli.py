@@ -5,6 +5,7 @@ import logging.config
 from fabric import colors
 
 from .fetcher import fetcher
+from .config import sentry
 
 
 class Commands(object):
@@ -32,7 +33,11 @@ def main():
 
     args = parser.parse_args()
 
-    getattr(Commands, args.command, Commands.unknown_command)()
+    try:
+        getattr(Commands, args.command, Commands.unknown_command)()
+    except Exception:
+        sentry.captureException()
+
 
 if __name__ == '__main__':
     main()
