@@ -22,4 +22,5 @@ def fetcher():
 def __start_task(json_string):
     task = json.loads(json_string)
     build = Build(task['id'], task)
+    build.start_build()
     logger.info('Started %s' % build)
