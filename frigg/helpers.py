@@ -1,8 +1,17 @@
 # -*- coding: utf8 -*-
-from os import listdir
 from time import sleep
+from os import listdir
 from os.path import isfile, join
 from datetime import datetime
+
+from fabric.operations import local
+
+
+def local_run(command):
+    """
+    Makes sure both stderr and stdout is in the fabric.operations.local output
+    """
+    return local('%s 2>&1' % command, capture=True)
 
 
 def detect_test_runners(build):

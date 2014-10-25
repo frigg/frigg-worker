@@ -5,10 +5,9 @@ import yaml
 import logging
 
 from fabric.context_managers import settings, lcd
-from fabric.operations import local
 from frigg import api
 
-from frigg.helpers import detect_test_runners, cached_property
+from frigg.helpers import local_run, detect_test_runners, cached_property
 from .config import config, sentry
 
 logger = logging.getLogger(__name__)
@@ -103,14 +102,14 @@ class Build(object):
             logger.info("Run of build %s finished." % self.id)
 
     def clone_repo(self, depth=1):
-        local("mkdir -p %s" % os.path.dirname(self.working_directory))
+        local_run("mkdir -p %s" % os.path.dirname(self.working_directory))
         with settings(warn_only=True):
-            clone = local("git clone --depth=%s --branch=%s %s %s" % (
+            clone = local_run("git clone --depth=%s --branch=%s %s %s" % (
                 depth,
                 self.branch,
                 self.clone_url,
                 self.working_directory
-            ), capture=True)
+            ))
             if not clone.succeeded:
                 message = "Access denied to %s/%s" % (self.owner, self.name)
                 logger.error(message)
@@ -119,12 +118,12 @@ class Build(object):
     def run_task(self, task_command):
         with settings(warn_only=True):
             with lcd(self.working_directory):
-                run_result = local(task_command, capture=True)
+                run_result = local_run(task_command)
                 self.results.append(Result(task_command, run_result))
 
     def delete_working_dir(self):
         if os.path.exists(self.working_directory):
-            local("rm -rf %s" % self.working_directory)
+            local_run("rm -rf %s" % self.working_directory)
 
     def error(self, task, message):
         self.results.append(Result(task, error=message))
