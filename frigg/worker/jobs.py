@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
 import json
 import os
-import requests
 import yaml
 import logging
 
 from fabric.context_managers import settings, lcd
 from fabric.operations import local
+from frigg import api
 
 from frigg.helpers import detect_test_runners, cached_property
 from .config import config, sentry
@@ -131,19 +131,7 @@ class Build(object):
         self.errored = True
 
     def report_run(self):
-        response = requests.post(
-            config('HQ_REPORT_URL'),
-            json.dumps(self, default=Build.serializer),
-            headers={
-                'content-type': 'application/json',
-                'FRIGG_WORKER_TOKEN': config('TOKEN')
-            }
-        )
-        logger.info('Reported build to hq, hq response status-code: %s' % response.status_code)
-        if response.status_code != 200:
-            with open('build-%s-hq-response.html' % self.id, 'w') as f:
-                f.write(response.text)
-        return response
+        api.report_run(json.dumps(self, default=Build.serializer))
 
     @classmethod
     def serializer(cls, obj):
