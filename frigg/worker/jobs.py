@@ -9,7 +9,7 @@ import threading
 from fabric.context_managers import settings, lcd
 from fabric.operations import local
 
-from frigg.helpers import detect_test_runners
+from frigg.helpers import detect_test_runners, cached_property
 from .config import config, sentry
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ class Build(object):
                 return False
         return True
 
-    @property
+    @cached_property
     def settings(self):
         path = os.path.join(self.working_directory, '.frigg.yml')
         # Default value for project .frigg.yml

@@ -1,10 +1,15 @@
 # -*- coding: utf8 -*-
 from os import listdir
+from time import sleep
 from os.path import isfile, join
+from datetime import datetime
 
 
 def detect_test_runners(build):
-    files = _list_files(build.working_directory)
+    try:
+        files = _list_files(build.working_directory)
+    except OSError:
+        files = []
     return _detect_test_runners(files)
 
 
@@ -52,3 +57,32 @@ def test__detect_test_runners():
 
 def _list_files(path):
     return [f for f in listdir(path) if isfile(join(path, f))]
+
+
+class CachedProperty(object):
+    def __init__(self, func, name=None):
+        self.func = func
+        self.__doc__ = getattr(func, '__doc__')
+        self.name = name or func.__name__
+
+    def __get__(self, instance, type=None):
+        if instance is None:
+            return self
+        res = instance.__dict__[self.name] = self.func(instance)
+        return res
+
+
+cached_property = CachedProperty
+
+
+def test_cached_property():
+    class A(object):
+        @cached_property
+        def func(self):
+            return datetime.now().microsecond
+
+    a = A()
+    first = a.func
+    sleep(0.1)
+    last = a.func
+    assert(first == last)
