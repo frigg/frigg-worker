@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import json
+import threading
 import time
 import logging
 
@@ -21,6 +22,14 @@ def fetcher():
 
 def __start_task(json_string):
     task = json.loads(json_string)
+    thread = threading.Thread(name='build-%s' % task['id'], target=__start_build, args=[task])
+    thread.daemon = True
+    thread.start()
+    logger.info('Started %s' % task)
+    return thread
+
+
+def __start_build(task):
     build = Build(task['id'], task)
-    build.start_build()
-    logger.info('Started %s' % build)
+    build.run_tests()
+    del build

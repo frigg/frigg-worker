@@ -4,7 +4,6 @@ import os
 import requests
 import yaml
 import logging
-import threading
 
 from fabric.context_managers import settings, lcd
 from fabric.operations import local
@@ -51,12 +50,6 @@ class Build(object):
     def __init__(self, id, object):
         self.__dict__.update(object)
         self.id = id
-
-    def start_build(self):
-        t = threading.Thread(target=self.run_tests)
-        t.setDaemon(True)
-        t.start()
-        return t
 
     @property
     def working_directory(self):
