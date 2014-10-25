@@ -32,4 +32,6 @@ def __start_task(json_string):
 def __start_build(task):
     build = Build(task['id'], task)
     build.run_tests()
+    for result in build.results:
+        del result
     del build
