@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import sys
 import json
 import threading
 import time
@@ -32,6 +33,4 @@ def __start_task(json_string):
 def __start_build(task):
     build = Build(task['id'], task)
     build.run_tests()
-    for result in build.results:
-        del result
-    del build
+    sys.exit(0)
