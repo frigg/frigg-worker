@@ -49,6 +49,7 @@ class Build(object):
     def __init__(self, id, object):
         self.__dict__.update(object)
         self.id = id
+        self.results = []
 
     @property
     def working_directory(self):
