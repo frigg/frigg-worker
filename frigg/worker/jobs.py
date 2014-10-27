@@ -46,9 +46,9 @@ class Build(object):
     owner = None
     errored = False
 
-    def __init__(self, id, object):
-        self.__dict__.update(object)
-        self.id = id
+    def __init__(self, build_id, obj):
+        self.__dict__.update(obj)
+        self.id = build_id
         self.results = []
 
     @property
