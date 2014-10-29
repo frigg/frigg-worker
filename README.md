@@ -1,4 +1,5 @@
 # frigg-worker
+[![Build status](https://ci.frigg.io/badges/frigg/frigg-worker/)](https://ci.frigg.io/frigg/frigg-worker/)
 
 A worker application that listens to the frigg broker an pick up builds and build them.
 
