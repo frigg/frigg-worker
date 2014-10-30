@@ -80,6 +80,10 @@ class Build(object):
         except IOError:
             logger.info('No .frigg.yml for build %s' % self)
             settings['tasks'] = detect_test_runners(self)
+
+        if len(settings['tasks']) == 0:
+            raise RuntimeError('No tasks found')
+
         return settings
 
     def run_tests(self):
