@@ -78,6 +78,7 @@ class Build(object):
             with open(path) as f:
                 settings.update(yaml.load(f))
         except IOError:
+            logger.info('No .frigg.yml for build %s' % self)
             settings['tasks'] = detect_test_runners(self)
         return settings
 
@@ -87,7 +88,6 @@ class Build(object):
             return self.error('git clone', 'Access denied')
 
         try:
-
             for task in self.settings['tasks']:
                 self.run_task(task)
                 if self.succeeded is False:
@@ -97,6 +97,7 @@ class Build(object):
         except Exception, e:
             self.error('', e)
             sentry.captureException()
+            logger.error('Build nr. %s failed\n%s' % (self.id, e.message))
         finally:
             self.delete_working_dir()
             self.report_run()

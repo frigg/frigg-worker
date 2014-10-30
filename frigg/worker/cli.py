@@ -7,6 +7,8 @@ from fabric import colors
 from .fetcher import fetcher
 from .config import sentry
 
+logger = logging.getLogger(__name__)
+
 
 class Commands(object):
 
@@ -35,7 +37,8 @@ def main():
 
     try:
         getattr(Commands, args.command, Commands.unknown_command)()
-    except Exception:
+    except Exception, e:
+        logger.error(e)
         sentry.captureException()
 
 

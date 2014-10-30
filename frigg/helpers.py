@@ -1,10 +1,13 @@
 # -*- coding: utf8 -*-
+import logging
 from time import sleep
 from os import listdir
 from os.path import isfile, join
 from datetime import datetime
 
 from fabric.operations import local
+
+logger = logging.getLogger(__name__)
 
 
 def local_run(command):
@@ -17,8 +20,9 @@ def local_run(command):
 def detect_test_runners(build):
     try:
         files = _list_files(build.working_directory)
-    except OSError:
+    except OSError, e:
         files = []
+        logger.error('Could not read files in build %s: \n' % (build.id, e.message))
     return _detect_test_runners(files)
 
 
