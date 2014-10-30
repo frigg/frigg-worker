@@ -22,7 +22,7 @@ def detect_test_runners(build):
         files = _list_files(build.working_directory)
     except OSError, e:
         files = []
-        logger.error('Could not read files in build %s: \n' % (build.id, e.message))
+        logger.error('Could not read files in build %s: \n %s' % (build.id, e.message))
     return _detect_test_runners(files)
 
 

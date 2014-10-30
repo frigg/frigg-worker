@@ -78,7 +78,7 @@ class Build(object):
             with open(path) as f:
                 settings.update(yaml.load(f))
         except IOError:
-            logger.info('No .frigg.yml for build %s' % self)
+            logger.info('No .frigg.yml for build %s' % self.id)
             settings['tasks'] = detect_test_runners(self)
 
         if len(settings['tasks']) == 0:
