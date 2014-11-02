@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+import getpass
 import os
 import logging.config
 
@@ -10,12 +11,28 @@ from .config import sentry
 logger = logging.getLogger(__name__)
 
 
-class Commands(object):
+SUPERVISOR_TEMPLATE = '''[program:frigg-worker]
+directory=%(path)s
+command=%(worker_path)s start
+autostart=true
+autorestart=true
+redirect_stderr=true
+user=%(user)s'''
 
+
+class Commands(object):
     @staticmethod
     def start():
         print(colors.green("Starting frigg worker"))
         fetcher()
+
+    @staticmethod
+    def supervisor_config():
+        print(SUPERVISOR_TEMPLATE % {
+            'path': os.getcwd(),
+            'worker_path': '%s/frigg-worker/bin/frigg-worker' % os.getcwd(),
+            'user': getpass.getuser()
+        })
 
     @staticmethod
     def unknown_command():
@@ -36,7 +53,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        getattr(Commands, args.command, Commands.unknown_command)()
+        getattr(Commands, args.command.replace('-', '_'), Commands.unknown_command)()
     except Exception, e:
         logger.error(e)
         sentry.captureException()
