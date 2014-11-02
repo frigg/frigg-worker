@@ -10,3 +10,4 @@ raven
 # testing tools
 pytest
 coverage
+mock

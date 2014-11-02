@@ -17,7 +17,7 @@ def report_run(build):
             'FRIGG_WORKER_TOKEN': config('TOKEN')
         }
     )
-    logger.info('Reported build to hq, hq response status-code: %s' % response.status_code)
+    logger.info('Reported build to hq, hq response status-code: %s, data:\n%s' % (response.status_code, build))
     if response.status_code != 200:
         with open('build-%s-hq-response.html' % build['id'], 'w') as f:
             f.write(response.text)
