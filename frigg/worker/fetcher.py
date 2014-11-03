@@ -15,21 +15,14 @@ def fetcher():
     while redis:
         task = redis.rpop('frigg:queue')
         if task:
-            start_task(task)
+            start_build(task)
 
         time.sleep(2)
 
 
-def start_task(json_string):
+def start_build(json_string):
     task = json.loads(json_string)
-    thread = threading.Thread(name='build-%s' % task['id'], target=start_build, args=[task])
-    thread.daemon = True
-    thread.start()
-    logger.info('Started %s' % task)
-    return thread
-
-
-def start_build(task):
     build = Build(task['id'], task)
+    logger.info('Starting %s' % task)
     build.run_tests()
 
