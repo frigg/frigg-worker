@@ -141,5 +141,10 @@ class Build(object):
     @classmethod
     def serializer(cls, obj):
         out = obj.__dict__
-        out['results'] = [Result.serialize(r) for r in obj.results]
+        if isinstance(obj, Build):
+            out['results'] = [Result.serialize(r) for r in obj.results]
+            try:
+                out['settings'] = obj.settings
+            except RuntimeError:
+                pass
         return out
