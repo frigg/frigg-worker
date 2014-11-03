@@ -6,7 +6,8 @@ import logging.config
 from fabric import colors
 
 from .fetcher import fetcher
-from .config import sentry
+from .config import sentry, config
+from frigg.helpers import local_run
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class Commands(object):
     @staticmethod
     def start():
         print(colors.green("Starting frigg worker"))
+        local_run("mkdir -p %s" % config('TMP_DIR'))
         fetcher()
 
     @staticmethod

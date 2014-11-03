@@ -108,7 +108,6 @@ class Build(object):
             logger.info("Run of build %s finished." % self.id)
 
     def clone_repo(self, depth=1):
-        local_run("mkdir -p %s" % os.path.dirname(self.working_directory))
         with settings(warn_only=True):
             clone = local_run("git clone --depth=%s --branch=%s %s %s" % (
                 depth,
