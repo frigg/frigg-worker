@@ -12,6 +12,10 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
         'fabric',
+        'redis',
+        'pyyaml',
+        'requests',
+        'raven'
     ],
     entry_points={
         'console_scripts': ['frigg-worker = frigg.worker.cli:main']

@@ -1,0 +1,9 @@
+REDIS:
+  host: localhost
+  port: 6379
+  db: 2
+  password: null
+
+TMP_DIR: builds/
+
+HQ_REPORT_URL: http://httpbin.org/post

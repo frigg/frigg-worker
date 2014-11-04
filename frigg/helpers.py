@@ -1,10 +1,28 @@
 # -*- coding: utf8 -*-
+import logging
+from time import sleep
 from os import listdir
 from os.path import isfile, join
+from datetime import datetime
+
+from fabric.operations import local
+
+logger = logging.getLogger(__name__)
+
+
+def local_run(command):
+    """
+    Makes sure both stderr and stdout is in the fabric.operations.local output
+    """
+    return local('%s 2>&1' % command, capture=True)
 
 
 def detect_test_runners(build):
-    files = _list_files(build.working_directory)
+    try:
+        files = _list_files(build.working_directory)
+    except OSError, e:
+        files = []
+        logger.error('Could not read files in build %s: \n %s' % (build.id, e.message))
     return _detect_test_runners(files)
 
 
@@ -31,8 +49,8 @@ def _detect_test_runners(files):
 def test__detect_test_runners():
     assert(_detect_test_runners([]) == [])
     assert(_detect_test_runners(['random file']) == [])
-    files = ['_config.yml', 'Cargo.toml', 'build.sbt', 'package.json', 'manage.py', 'setup.py', 'tox.ini',
-             'Makefile']
+    files = ['_config.yml', 'Cargo.toml', 'build.sbt', 'package.json', 'manage.py', 'setup.py',
+             'tox.ini', 'Makefile']
     assert(_detect_test_runners(files) == ['make test'])
     del files[len(files) - 1]
     assert(_detect_test_runners(files) == ['tox', 'flake8'])
@@ -52,3 +70,32 @@ def test__detect_test_runners():
 
 def _list_files(path):
     return [f for f in listdir(path) if isfile(join(path, f))]
+
+
+class CachedProperty(object):
+    def __init__(self, func, name=None):
+        self.func = func
+        self.__doc__ = getattr(func, '__doc__')
+        self.name = name or func.__name__
+
+    def __get__(self, instance, type=None):
+        if instance is None:
+            return self
+        res = instance.__dict__[self.name] = self.func(instance)
+        return res
+
+
+cached_property = CachedProperty
+
+
+def test_cached_property():
+    class A(object):
+        @cached_property
+        def func(self):
+            return datetime.now().microsecond
+
+    a = A()
+    first = a.func
+    sleep(0.1)
+    last = a.func
+    assert(first == last)
