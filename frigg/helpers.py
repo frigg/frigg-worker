@@ -59,7 +59,7 @@ def test__detect_test_runners():
     del files[len(files) - 1]
     assert(_detect_test_runners(files) == ['python manage.py test', 'flake8'])
     del files[len(files) - 1]
-    assert(_detect_test_runners(files) == ['npm test'])
+    assert(_detect_test_runners(files) == ['npm install', 'npm test'])
     del files[len(files) - 1]
     assert(_detect_test_runners(files) == ['sbt test'])
     del files[len(files) - 1]
