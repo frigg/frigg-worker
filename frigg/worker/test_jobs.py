@@ -1,7 +1,5 @@
 # -*- coding: utf8 -*-
-import json
 import unittest
-from _pytest.runner import skip
 from fabric.operations import _AttributeString
 
 from .jobs import Build, Result
@@ -52,15 +50,6 @@ class BuildTestCase(unittest.TestCase):
         self.assertTrue(self.build.succeeded)
         self.build.results.append(failure)
         self.assertFalse(self.build.succeeded)
-
-    @skip('need to check each property')
-    def test_serializer(self):
-        self.assertEqual(
-            json.dumps(self.build, default=Build.serializer),
-            '{"sha": "superbhash", "clone_url": "https://github.com/frigg/test-repo.git", "name": "test-repo", '
-            '"branch": "master", "owner": "frigg", "id": 1, "results": []}'
-        )
-        self.assertEqual(json.dumps({'a': 'dict you say'}, default=Build.serializer), '{"a": "dict you say"}' )
 
 
 class ResultTestCase(unittest.TestCase):

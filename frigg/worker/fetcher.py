@@ -1,6 +1,5 @@
 # -*- coding: utf8 -*-
 import json
-import threading
 import time
 import logging
 
@@ -25,4 +24,3 @@ def start_build(json_string):
     build = Build(task['id'], task)
     logger.info('Starting %s' % task)
     build.run_tests()
-
