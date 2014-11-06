@@ -1,6 +1,5 @@
 # -*- coding: utf8 -*-
 import json
-import threading
 import time
 import logging
 

@@ -44,6 +44,7 @@ class Build(object):
     clone_url = None
     name = None
     owner = None
+    pull_request_id = None
     errored = False
 
     def __init__(self, build_id, obj):
@@ -108,12 +109,21 @@ class Build(object):
             logger.info("Run of build %s finished." % self.id)
 
     def clone_repo(self, depth=1):
-        clone = local_run("git clone --depth=%s --branch=%s %s %s" % (
-            depth,
-            self.branch,
-            self.clone_url,
-            self.working_directory
-        ))
+        command_options = {
+            'depth': depth,
+            'url': self.clone_url,
+            'pwd': self.working_directory,
+            'branch': self.branch,
+            'pr_id': self.pull_request_id
+        }
+        if self.pull_request_id is None:
+            clone = local_run("git clone --depth=%(depth)s --branch=%(branch)s %(url)s %(pwd)s" % command_options)
+        else:
+            clone = local_run(
+                ("git clone --depth=%(depth)s %(url)s %(pwd)s && cd %(pwd)s "
+                 "&& git fetch origin pull/%(pr_id)s/head:%(branch)s "
+                 "&& git checkout %(branch)s") % command_options
+            )
         if not clone.succeeded:
             message = "Access denied to %s/%s" % (self.owner, self.name)
             logger.error(message)
