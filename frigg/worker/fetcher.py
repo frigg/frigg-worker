@@ -24,4 +24,3 @@ def start_build(json_string):
     build = Build(task['id'], task)
     logger.info('Starting %s' % task)
     build.run_tests()
-

@@ -117,7 +117,8 @@ class Build(object):
             'pr_id': self.pull_request_id
         }
         if self.pull_request_id is None:
-            clone = local_run("git clone --depth=%(depth)s --branch=%(branch)s %(url)s %(pwd)s" % command_options)
+            clone = local_run("git clone --depth=%(depth)s --branch=%(branch)s "
+                              "%(url)s %(pwd)s" % command_options)
         else:
             clone = local_run(
                 ("git clone --depth=%(depth)s %(url)s %(pwd)s && cd %(pwd)s "
