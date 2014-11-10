@@ -95,9 +95,6 @@ class Build(object):
         try:
             for task in self.settings['tasks']:
                 self.run_task(task)
-                if self.succeeded is False:
-                    # if one task fails, we do not care about the rest
-                    break
 
         except Exception, e:
             self.error('', e)
