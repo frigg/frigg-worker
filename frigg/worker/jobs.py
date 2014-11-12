@@ -120,7 +120,7 @@ class Build(object):
             clone = local_run(
                 ("git clone --depth=%(depth)s %(url)s %(pwd)s && cd %(pwd)s "
                  "&& git fetch origin pull/%(pr_id)s/head:pull-%(pr_id)s "
-                 "&& git checkout %(pr_id)s") % command_options
+                 "&& git checkout pull-%(pr_id)s") % command_options
             )
         if not clone.succeeded:
             message = "Access denied to %s/%s" % (self.owner, self.name)
