@@ -68,18 +68,22 @@ class Build(object):
 
     @cached_property
     def settings(self):
-        path = os.path.join(self.working_directory, '.frigg.yml')
-        # Default value for project .frigg.yml
+        path = None
+        if os.path.exists(os.path.join(self.working_directory, '.frigg.yml')):
+            path = os.path.join(self.working_directory, '.frigg.yml')
+        elif os.path.exists(os.path.join(self.working_directory, '.frigg.yaml')):
+            path = os.path.join(self.working_directory, '.frigg.yaml')
+
         settings = {
             'webhooks': [],
             'comment': False
         }
 
-        try:
+        if path is not None:
             with open(path) as f:
                 settings.update(yaml.load(f))
-        except IOError:
-            logger.info('No .frigg.yml for build %s' % self.id)
+        else:
+            logger.info('No settings for build %s' % self.id)
             settings['tasks'] = detect_test_runners(self)
 
         if len(settings['tasks']) == 0:
