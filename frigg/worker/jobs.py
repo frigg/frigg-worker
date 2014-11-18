@@ -145,7 +145,7 @@ class Build(object):
         self.errored = True
 
     def report_run(self):
-        api.report_run(json.dumps(self, default=Build.serializer))
+        api.report_run(self.id, json.dumps(self, default=Build.serializer))
 
     @classmethod
     def serializer(cls, obj):

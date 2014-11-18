@@ -8,7 +8,7 @@ from .worker.config import config
 logger = logging.getLogger(__name__)
 
 
-def report_run(build):
+def report_run(build_id, build):
     response = requests.post(
         config('HQ_REPORT_URL'),
         data=build,
@@ -22,6 +22,6 @@ def report_run(build):
         build
     ))
     if response.status_code != 200:
-        with open('build-%s-hq-response.html' % build['id'], 'w') as f:
+        with open('build-%s-hq-response.html' % build_id, 'w') as f:
             f.write(response.text)
     return response
