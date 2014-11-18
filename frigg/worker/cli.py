@@ -45,7 +45,7 @@ def main():
     import argparse
 
     try:
-        logging.config.fileConfig(os.path.expanduser('~/.frigg/logging.conf'))
+        logging.config.fileConfig(os.path.join(os.path.dirname(__file__), 'logging.conf'))
     except Exception, e:
         print("There is a problem with the logging config:\n%s" % e)
 
