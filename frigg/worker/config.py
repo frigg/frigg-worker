@@ -8,18 +8,23 @@ from raven import Client
 
 def config(key):
     settings = yaml.load(open(os.path.join(os.path.dirname(__file__), 'defaults.yml')))
-    try:
-        settings.update(yaml.load(open(os.path.expanduser('~/.frigg/worker.yaml'))))
-    except IOError:
-        pass
+    paths = [
+        '/etc/frigg/worker.yaml',
+        os.path.expanduser('~/.frigg/worker.yaml'),
+    ]
+    for path in paths:
+        try:
+            settings.update(yaml.load(open(path)))
+        except IOError:
+            pass
     return settings.get(key, None)
 
 
 def test_config():
-    assert(config('REDIS')['host'] == 'localhost')
-    assert(config('REDIS')['port'] == 6379)
-    assert(config('REDIS')['db'] == 2)
-    assert(config('REDIS')['password'] is None)
+    assert (config('REDIS')['host'] == 'localhost')
+    assert (config('REDIS')['port'] == 6379)
+    assert (config('REDIS')['db'] == 2)
+    assert (config('REDIS')['password'] is None)
 
 
 def redis_client():
@@ -29,5 +34,6 @@ def redis_client():
         db=config('REDIS')['db'],
         password=config('REDIS')['password']
     )
+
 
 sentry = Client(config('SENTRY_DSN'))
