@@ -20,13 +20,6 @@ def config(key):
     return settings.get(key, None)
 
 
-def test_config():
-    assert (config('REDIS')['host'] == 'localhost')
-    assert (config('REDIS')['port'] == 6379)
-    assert (config('REDIS')['db'] == 2)
-    assert (config('REDIS')['password'] is None)
-
-
 def redis_client():
     return redis.Redis(
         host=config('REDIS')['host'],
