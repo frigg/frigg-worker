@@ -6,6 +6,7 @@ import logging
 
 from fabric.context_managers import lcd
 from frigg import api
+from frigg_coverage import parse_coverage
 
 from frigg.helpers import local_run, detect_test_runners, cached_property
 from .config import config, sentry
@@ -76,6 +77,7 @@ class Build(object):
 
         settings = {
             'webhooks': [],
+            'coverage': None,
             'comment': False
         }
 
@@ -99,6 +101,9 @@ class Build(object):
         try:
             for task in self.settings['tasks']:
                 self.run_task(task)
+
+            if self.settings['coverage']:
+                parse_coverage(self.settings['coverage']['path'], self.settings['coverage']['parser'])
 
         except Exception, e:
             self.error('', e)
