@@ -10,5 +10,4 @@ raven
 # testing tools
 pytest
 pytest-cov
-coverage
 mock
