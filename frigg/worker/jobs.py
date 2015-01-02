@@ -47,6 +47,7 @@ class Build(object):
     owner = None
     pull_request_id = None
     errored = False
+    coverage = None
 
     def __init__(self, build_id, obj):
         self.__dict__.update(obj)
@@ -103,7 +104,10 @@ class Build(object):
                 self.run_task(task)
 
             if self.settings['coverage']:
-                parse_coverage(self.settings['coverage']['path'], self.settings['coverage']['parser'])
+                self.coverage = parse_coverage(
+                    self.settings['coverage']['path'],
+                    self.settings['coverage']['parser']
+                )
 
         except Exception, e:
             self.error('', e)
