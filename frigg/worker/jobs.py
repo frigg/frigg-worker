@@ -105,7 +105,7 @@ class Build(object):
 
             if self.settings['coverage']:
                 self.coverage = parse_coverage(
-                    self.settings['coverage']['path'],
+                    os.path.join(self.working_directory, self.settings['coverage']['path']),
                     self.settings['coverage']['parser']
                 )
 
