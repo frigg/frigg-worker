@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='frigg-worker',
-    version='0.4.2',
+    version='0.5.0',
     description='A worker application that listens to the frigg broker '
                 'an pick up builds and build them.',
     author='The frigg team',
@@ -22,6 +22,6 @@ setup(
     },
     classifiers=[
         'Development Status :: 4 - Beta',
-        'Programming Language :: Python 3',
+        'Programming Language :: Python :: 3',
     ]
 )
