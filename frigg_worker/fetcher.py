@@ -1,10 +1,9 @@
 # -*- coding: utf8 -*-
 import json
-import time
 import logging
+import time
 
-from frigg.worker import config
-from frigg.worker.jobs import Build
+from frigg import Build, config
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ def fetcher():
     while redis:
         task = redis.rpop('frigg:queue')
         if task:
-            start_build(task)
+            start_build(task.decode())
 
         time.sleep(2)
 

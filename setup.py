@@ -14,14 +14,11 @@ setup(
     include_package_data=True,
     install_requires=[
         'frigg-coverage',
-        'fabric',
         'redis',
-        'pyyaml',
-        'requests',
         'raven'
     ],
     entry_points={
-        'console_scripts': ['frigg-worker = frigg.worker.cli:main']
+        'console_scripts': ['frigg-worker = frigg_worker.cli:main']
     },
     classifiers=[
         'Development Status :: 4 - Beta',

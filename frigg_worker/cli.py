@@ -1,13 +1,12 @@
 # -*- coding: utf8 -*-
 import getpass
-import os
 import logging.config
+import os
 
-from fabric import colors
+from frigg.config import config, sentry
+from frigg.helpers import local_run
 
 from .fetcher import fetcher
-from .config import sentry, config
-from frigg.helpers import local_run
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ user=%(user)s'''
 class Commands(object):
     @staticmethod
     def start():
-        print(colors.green("Starting frigg worker"))
+        print("Starting frigg worker")
         local_run("mkdir -p %s" % config('TMP_DIR'))
         fetcher()
 
@@ -38,16 +37,20 @@ class Commands(object):
 
     @staticmethod
     def unknown_command():
-        print(colors.red("Unknown command"))
+        print("Unknown command")
+
+
+def load_logging_config():
+    try:
+        logging.config.fileConfig(os.path.join(os.path.dirname(__file__), 'logging.conf'))
+    except Exception as e:
+        print("There is a problem with the logging config:\n%s" % e)
 
 
 def main():
     import argparse
 
-    try:
-        logging.config.fileConfig(os.path.join(os.path.dirname(__file__), 'logging.conf'))
-    except Exception, e:
-        print("There is a problem with the logging config:\n%s" % e)
+    load_logging_config()
 
     parser = argparse.ArgumentParser(description='Do some work for frigg.')
     parser.add_argument('command')
@@ -56,7 +59,7 @@ def main():
 
     try:
         getattr(Commands, args.command.replace('-', '_'), Commands.unknown_command)()
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         sentry.captureException()
 
