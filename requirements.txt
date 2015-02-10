@@ -9,3 +9,4 @@ raven
 pytest
 pytest-cov
 mock
+responses
