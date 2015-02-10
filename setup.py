@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='frigg-worker',
-    version='0.5.0',
+    version='0.6.0',
     description='A worker application that listens to the frigg broker '
                 'an pick up builds and build them.',
     long_description=open('README.rst').read(),
