@@ -16,7 +16,7 @@ Setup
 Supervisor config
 ~~~~~~~~~~~~~~~~~
 
-::
+.. code-block:: ini
 
     [program:frigg-worker]
     directory=/home/frigg/
