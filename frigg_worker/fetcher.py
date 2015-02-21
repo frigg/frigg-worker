@@ -5,7 +5,7 @@ import time
 
 import requests
 
-from frigg import Build
+from .jobs import Build
 from frigg.config import config
 
 logger = logging.getLogger(__name__)
