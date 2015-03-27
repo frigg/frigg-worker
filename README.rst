@@ -11,7 +11,7 @@ Setup
 
     virtualenv ~/frigg-worker
     ~/frigg-worker/bin/pip install frigg-worker
-    ~/frigg-worker/bin/frigg-worker start
+    ~/frigg-worker/bin/frigg-worker
 
 Supervisor config
 ~~~~~~~~~~~~~~~~~
@@ -20,7 +20,7 @@ Supervisor config
 
     [program:frigg-worker]
     directory=/home/frigg/
-    command=/home/frigg/frigg-worker/bin/frigg-worker start
+    command=/home/frigg/frigg-worker/bin/frigg-worker
     autostart=true
     autorestart=true
     redirect_stderr=true

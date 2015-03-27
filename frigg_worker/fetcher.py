@@ -27,8 +27,10 @@ def start_build(task):
 
 
 def fetch_task():
+    url = config('DISPATCHER_FETCH_URL')
+    logger.debug('Fetching new job from {}'.format(url))
     response = requests.get(
-        config('DISPATCHER_FETCH_URL'),
+        url,
         headers={
             'x-frigg-worker-token': config('DISPATCHER_TOKEN')
         }

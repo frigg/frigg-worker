@@ -1,38 +1,33 @@
 # -*- coding: utf-8 -*-
-import os
 import sys
+
 from io import StringIO
 from unittest import TestCase
 
+from click.testing import CliRunner
 from mock import patch
 
-from frigg_worker.cli import Commands, load_logging_config
+from frigg_worker.cli import load_logging_config, start
 
 
-class CommandsTestCase(TestCase):
-
-    def setUp(self):
-        self._stdout = sys.stdout
-        self.stdout = StringIO()
-        sys.stdout = self.stdout
-
-    def tearDown(self):
-        sys.stdout.close()
-        sys.stdout = self._stdout
-
-    def test_unknown_command(self):
-        Commands.unknown_command()
-        self.assertEqual(sys.stdout.getvalue(), 'Unknown command\n')
-
-    def test_supervisor_config(self):
-        Commands.supervisor_config()
-        output = sys.stdout.getvalue()
-        self.assertTrue(os.getcwd() in output)
+class CLITestCase(TestCase):
 
     @patch('frigg_worker.cli.fetcher')
     def test_start(self, mock_fetcher):
-        Commands.start()
+        runner = CliRunner()
+        result = runner.invoke(start, [])
+        self.assertTrue('Starting frigg worker' in result.output)
+        self.assertEqual(result.exit_code, 0)
         self.assertTrue(mock_fetcher.called)
+
+    @patch('frigg_worker.cli.fetcher', side_effect=OSError('os-error'))
+    def test_start(self, mock_fetcher):
+        runner = CliRunner()
+        result = runner.invoke(start, [])
+        self.assertTrue(mock_fetcher.called)
+        self.assertEqual(result.exit_code, 0)
+        self.assertTrue('Starting frigg worker' in result.output)
+        self.assertTrue('frigg_worker.cli - ERROR - os-error' in result.output)
 
 
 class LoggingConfigLoaderTestCase(TestCase):

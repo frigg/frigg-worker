@@ -1,6 +1,7 @@
 # dev requirements, prod requirements are found in setup.py
 #
 
+click==3.3
 frigg-common
 redis
 raven
