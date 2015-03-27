@@ -26,6 +26,7 @@ class Result(object):
             self.log = result.out
         if error:
             self.log = error or result.err
+            self.succeeded = False
 
     @classmethod
     def serialize(cls, obj):
@@ -67,6 +68,7 @@ class Build(object):
         return build_settings(self.working_directory)
 
     def run_tests(self):
+        task = None
         self.delete_working_dir()
         if not self.clone_repo():
             return self.error('git clone', 'Access denied')
@@ -82,9 +84,9 @@ class Build(object):
                 )
 
         except Exception as e:
-            self.error('', e)
+            self.error(task or '', e)
             sentry.captureException()
-            logger.error('Build nr. %s failed\n%s' % (self.id, e.message))
+            logger.error('Build nr. %s failed\n%s' % (self.id, str(e)))
         finally:
             self.delete_working_dir()
             self.report_run()
@@ -118,6 +120,7 @@ class Build(object):
 
     def delete_working_dir(self):
         if os.path.exists(self.working_directory):
+            print('hei')
             local_run("rm -rf %s" % self.working_directory)
 
     def error(self, task, message):
