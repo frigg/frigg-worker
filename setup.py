@@ -23,6 +23,7 @@ setup(
     install_requires=[
         'click==3.3'
         'frigg-coverage',
+        'frigg-common',
         'redis',
         'raven'
     ],

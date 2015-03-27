@@ -3,6 +3,7 @@
 
 click==3.3
 frigg-common
+frigg-coverage
 redis
 raven
 
