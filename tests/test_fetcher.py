@@ -15,7 +15,7 @@ def mock_config(key):
 
 
 class FetcherTestCase(TestCase):
-    @patch('frigg.Build.run_tests')
+    @patch('frigg_worker.jobs.Build.run_tests')
     def test_start_build(self, mock_runtests):
         start_build({
             'id': 1,
