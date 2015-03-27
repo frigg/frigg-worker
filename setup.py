@@ -10,7 +10,7 @@ def read(*parts):
 
 setup(
     name='frigg-worker',
-    version='0.7.0',
+    version='0.7.2',
     description='A worker application that listens to the frigg broker '
                 'an pick up builds and build them.',
     long_description=read('README.rst'),
@@ -21,14 +21,14 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     install_requires=[
-        'click==3.3'
+        'click==3.3',
         'frigg-coverage',
         'frigg-common',
         'redis',
         'raven'
     ],
     entry_points={
-        'console_scripts': ['frigg-worker = frigg_worker.cli:main']
+        'console_scripts': ['frigg-worker = frigg_worker.cli:start']
     },
     classifiers=[
         'Development Status :: 4 - Beta',
