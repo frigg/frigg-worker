@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import sys
-
 from io import StringIO
 from unittest import TestCase
 
@@ -20,8 +19,16 @@ class CLITestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertTrue(mock_fetcher.called)
 
+    @patch('frigg_worker.cli.fetcher')
+    def test_start_with_dispatcher_option(self, mock_fetcher):
+        runner = CliRunner()
+        result = runner.invoke(start, ['--dispatcher-url=http://frigg.io'])
+        self.assertTrue('Starting frigg worker' in result.output)
+        self.assertEqual(result.exit_code, 0)
+        mock_fetcher.assert_called_once_with('http://frigg.io')
+
     @patch('frigg_worker.cli.fetcher', side_effect=OSError('os-error'))
-    def test_start(self, mock_fetcher):
+    def test_start_with_error(self, mock_fetcher):
         runner = CliRunner()
         result = runner.invoke(start, [])
         self.assertTrue(mock_fetcher.called)

@@ -19,13 +19,15 @@ def load_logging_config():
 
 
 @click.command()
-def start():
+@click.option('--dispatcher-url', default=None,
+              help='The url to the dispatcher, overrides the settings')
+def start(dispatcher_url):
     load_logging_config()
 
     try:
         print("Starting frigg worker")
         local_run("mkdir -p %s" % config('TMP_DIR'))
-        fetcher()
+        fetcher(dispatcher_url)
     except Exception as e:
         logger.error(e)
         sentry.captureException()

@@ -1,8 +1,9 @@
 # -*- coding: utf8 -*-
 import unittest
 
-from frigg.helpers import ProcessResult
 import mock
+from frigg.helpers import ProcessResult
+
 from frigg_worker.jobs import Build, Result
 
 DATA = {
@@ -80,7 +81,7 @@ class BuildTestCase(unittest.TestCase):
 
     @mock.patch('frigg_worker.jobs.Build.run_task')
     @mock.patch('frigg_worker.jobs.Build.clone_repo', lambda x: False)
-    def test_run_tests_fail_task(self, mock_run_task):
+    def test_run_tests_fail_clone(self, mock_run_task):
         self.build.run_tests()
         self.assertFalse(mock_run_task.called)
         self.assertFalse(self.build.succeeded)

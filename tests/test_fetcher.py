@@ -37,3 +37,17 @@ class FetcherTestCase(TestCase):
 
         task = fetch_task()
         self.assertEqual(task['id'], 1)
+
+    @patch('frigg_worker.fetcher.config', mock_config)
+    @responses.activate
+    def test_fetch_task_custom_dispatcher(self):
+
+        responses.add(
+            responses.GET,
+            'http://dispatcher.io',
+            body=json.dumps({'job': {'id': 1}}),
+            content_type='application/json'
+        )
+
+        task = fetch_task('http://dispatcher.io')
+        self.assertEqual(task['id'], 1)
