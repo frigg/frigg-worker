@@ -4,8 +4,9 @@ import sys
 from io import StringIO
 from unittest import TestCase
 
-from frigg_worker.cli import Commands, load_logging_config
 from mock import patch
+
+from frigg_worker.cli import Commands, load_logging_config
 
 
 class CommandsTestCase(TestCase):
