@@ -2,6 +2,7 @@ tasks:
  - tox
  - flake8
  - isort -c -rc frigg_worker tests
+ - coverage report && coverage xml
 
 coverage:
  path: coverage.xml
