@@ -17,15 +17,18 @@ class CLITestCase(TestCase):
         result = runner.invoke(start, [])
         self.assertTrue('Starting frigg worker' in result.output)
         self.assertEqual(result.exit_code, 0)
-        self.assertTrue(mock_fetcher.called)
+        mock_fetcher.assert_called_once_with(dispatcher_token=None, dispatcher_url=None)
 
     @patch('frigg_worker.cli.fetcher')
-    def test_start_with_dispatcher_option(self, mock_fetcher):
+    def test_start_with_dispatcher_options(self, mock_fetcher):
         runner = CliRunner()
-        result = runner.invoke(start, ['--dispatcher-url=http://frigg.io'])
+        result = runner.invoke(start, ['--dispatcher-url=http://frigg.io', '--dispatcher-token=to'])
         self.assertTrue('Starting frigg worker' in result.output)
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once_with('http://frigg.io')
+        mock_fetcher.assert_called_once_with(
+            dispatcher_token='to',
+            dispatcher_url='http://frigg.io'
+        )
 
     @patch('frigg_worker.cli.fetcher', side_effect=OSError('os-error'))
     def test_start_with_error(self, mock_fetcher):
