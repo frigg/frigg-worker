@@ -84,10 +84,12 @@ class BuildTestCase(unittest.TestCase):
         self.assertFalse(mock_run_task.called)
         self.assertFalse(self.build.succeeded)
 
-    @mock.patch('frigg_worker.jobs.api')
+    @mock.patch('frigg_worker.jobs.api.report_run')
+    @mock.patch('frigg_worker.jobs.Build.serializer', lambda *x: {})
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {})
     def test_report_run(self, mock_report_run):
         self.build.report_run()
-        mock_report_run.assert_called_once()
+        mock_report_run.assert_called_once_with(1, '{}')
 
     @mock.patch('frigg_worker.jobs.local_run')
     @mock.patch('os.path.exists', lambda x: True)
