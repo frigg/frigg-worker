@@ -11,9 +11,9 @@ from .jobs import Build
 logger = logging.getLogger(__name__)
 
 
-def fetcher(dispatcher_url=None):
+def fetcher(dispatcher_url=None, dispatcher_token=None):
     while True:
-        task = fetch_task(dispatcher_url)
+        task = fetch_task(dispatcher_url, dispatcher_token)
         if task:
             start_build(task)
 
@@ -26,15 +26,17 @@ def start_build(task):
     build.run_tests()
 
 
-def fetch_task(dispatcher_url=None):
+def fetch_task(dispatcher_url, dispatcher_token):
     if dispatcher_url is None:
         dispatcher_url = config('DISPATCHER_FETCH_URL')
+    if dispatcher_token is None:
+        dispatcher_token = config('DISPATCHER_TOKEN')
 
     logger.debug('Fetching new job from {}'.format(dispatcher_url))
     response = requests.get(
         dispatcher_url,
         headers={
-            'x-frigg-worker-token': config('DISPATCHER_TOKEN')
+            'x-frigg-worker-token': dispatcher_token
         }
     )
     return response.json()['job']
