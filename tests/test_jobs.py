@@ -25,10 +25,6 @@ class BuildTestCase(unittest.TestCase):
     def setUp(self):
         self.build = Build(1, DATA)
 
-    def tearDown(self):
-        for i in range(len(self.build.results)):
-            self.build.results.pop()
-
     def test_init(self):
         self.assertEquals(self.build.id, 1)
         self.assertEquals(len(self.build.results), 0)
@@ -43,18 +39,18 @@ class BuildTestCase(unittest.TestCase):
         self.build.error('tox', 'Command not found')
         self.assertEquals(len(self.build.results), 1)
         self.assertTrue(self.build.errored)
-        self.assertFalse(self.build.results[0].succeeded)
-        self.assertEquals(self.build.results[0].log, 'Command not found')
-        self.assertEquals(self.build.results[0].task, 'tox')
+        self.assertFalse(self.build.results['tox'].succeeded)
+        self.assertEquals(self.build.results['tox'].log, 'Command not found')
+        self.assertEquals(self.build.results['tox'].task, 'tox')
 
     def test_succeeded(self):
         success = Result('tox')
         success.succeeded = True
-        failure = Result('tox')
+        failure = Result('flake8')
         failure.succeeded = False
-        self.build.results.append(success)
+        self.build.results['tox'] = success
         self.assertTrue(self.build.succeeded)
-        self.build.results.append(failure)
+        self.build.results['flake8'] = failure
         self.assertFalse(self.build.succeeded)
 
     @mock.patch('frigg_worker.jobs.parse_coverage')
@@ -99,10 +95,12 @@ class BuildTestCase(unittest.TestCase):
 
     @mock.patch('frigg_worker.jobs.local_run')
     def test_run_task(self, mock_local_run):
+        self.build.results['tox'] = Result('tox')
         self.build.run_task('tox')
         mock_local_run.assert_called_once_with('tox', 'builds/1')
         self.assertEqual(len(self.build.results), 1)
-        self.assertEqual(self.build.results[0].task, 'tox')
+        self.assertEqual(self.build.results['tox'].task, 'tox')
+        self.assertEqual(self.build.results['tox'].pending, False)
 
     @mock.patch('frigg_worker.jobs.local_run')
     def test_clone_repo_regular(self, mock_local_run):
@@ -120,33 +118,58 @@ class BuildTestCase(unittest.TestCase):
             'git fetch origin pull/2/head:pull-2 && git checkout pull-2'
         )
 
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
+    def test_serializer(self):
+        serialized = Build.serializer(self.build)
+        self.assertEqual(serialized['id'], self.build.id)
+        self.assertEqual(serialized['finished'], self.build.finished)
+        self.assertEqual(serialized['owner'], self.build.owner)
+        self.assertEqual(serialized['name'], self.build.name)
+        self.assertEqual(serialized['results'], [])
 
-class ResultTestCase(unittest.TestCase):
-    def test_init_success(self):
+        self.build.tasks.append('tox')
+        self.build.results['tox'] = Result('tox')
+        serialized = Build.serializer(self.build)
+        self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': True}])
+
         result = ProcessResult(out='Success')
         result.succeeded = True
         result.return_code = 0
-        success = Result('tox', result=result)
+        self.build.results['tox'].update_result(result)
+        self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
+                                                  'return_code': 0, 'succeeded': True}])
+
+
+class ResultTestCase(unittest.TestCase):
+    def test_update_result_success(self):
+        result = ProcessResult(out='Success')
+        result.succeeded = True
+        result.return_code = 0
+        success = Result('tox')
+        success.update_result(result)
         self.assertTrue(success.succeeded)
         self.assertEquals(success.log, 'Success')
         self.assertEquals(success.task, 'tox')
 
-    def test_init_failure(self):
+    def test_update_result_failure(self):
         result = ProcessResult(out='Oh snap')
         result.succeeded = False
         result.return_code = 1
-        failure = Result('tox', result)
+        failure = Result('tox')
+        failure.update_result(result)
         self.assertFalse(failure.succeeded)
         self.assertEquals(failure.log, 'Oh snap')
         self.assertEquals(failure.task, 'tox')
 
-    def test_init_error(self):
-        error = Result('tox', error='Command not found')
+    def test_update_error(self):
+        error = Result('tox')
+        error.update_error('Command not found')
         self.assertFalse(error.succeeded)
         self.assertEquals(error.log, 'Command not found')
         self.assertEquals(error.task, 'tox')
 
     def test_serialize(self):
-        error = Result('tox', error='Command not found')
+        error = Result('tox')
+        error.update_error('Command not found')
         self.assertEqual(Result.serialize(error), error.__dict__)
         self.assertEqual(Result.serialize(Result.serialize(error)), error.__dict__)

@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+from copy import deepcopy
 import json
 import logging
 import os
@@ -17,16 +18,22 @@ class Result(object):
     return_code = None
     succeeded = None
     task = None
+    pending = None
 
-    def __init__(self, task, result=None, error=None):
+    def __init__(self, task):
         self.task = task
-        if result:
-            self.succeeded = result.succeeded
-            self.return_code = result.return_code
-            self.log = result.out
-        if error:
-            self.log = error or result.err
-            self.succeeded = False
+        self.pending = True
+
+    def update_result(self, result):
+        self.succeeded = result.succeeded
+        self.return_code = result.return_code
+        self.log = result.out
+        self.pending = False
+
+    def update_error(self, error):
+        self.log = error
+        self.succeeded = False
+        self.pending = False
 
     @classmethod
     def serialize(cls, obj):
@@ -37,7 +44,7 @@ class Result(object):
 
 class Build(object):
     id = ''
-    results = []
+    results = None
     cloned = False
     branch = 'master'
     sha = None
@@ -46,11 +53,14 @@ class Build(object):
     owner = None
     pull_request_id = None
     coverage = None
+    finished = False
 
     def __init__(self, build_id, obj):
         self.__dict__.update(obj)
         self.id = build_id
-        self.results = []
+        self.results = {}
+        self.tasks = []
+        self.finished = False
 
     @property
     def working_directory(self):
@@ -58,8 +68,8 @@ class Build(object):
 
     @property
     def succeeded(self):
-        for result in self.results:
-            if result.succeeded is False:
+        for key in self.results:
+            if self.results[key].succeeded is False:
                 return False
         return True
 
@@ -69,9 +79,12 @@ class Build(object):
 
     def run_tests(self):
         task = None
-        self.delete_working_dir()
         if not self.clone_repo():
             return self.error('git clone', 'Access denied')
+
+        self.finished = False
+        self.create_pending_tasks()
+        self.delete_working_dir()
 
         try:
             for task in self.settings['tasks']:
@@ -116,25 +129,40 @@ class Build(object):
 
     def run_task(self, task_command):
         run_result = local_run(task_command, self.working_directory)
-        self.results.append(Result(task_command, run_result))
+        self.results[task_command].update_result(run_result)
+
+    def create_pending_tasks(self):
+        """
+        Creates pending task results in a dict on self.result with task string as key. It will also
+        create a list on self.tasks that is used to make sure the serialization of the results
+        creates a correctly ordered list.
+        """
+        for task in self.settings['tasks']:
+            self.tasks.append(task)
+            self.results[task] = Result(task)
 
     def delete_working_dir(self):
         if os.path.exists(self.working_directory):
-            print('hei')
             local_run("rm -rf %s" % self.working_directory)
 
     def error(self, task, message):
-        self.results.append(Result(task, error=message))
         self.errored = True
+        if task in self.results:
+            self.results[task].update_error(message)
+        else:
+            result = Result(task)
+            result.update_error(message)
+            self.tasks.append(task)
+            self.results[task] = result
 
     def report_run(self):
         return api.report_run(self.id, json.dumps(self, default=Build.serializer)).status_code
 
     @classmethod
     def serializer(cls, obj):
-        out = obj.__dict__
+        out = deepcopy(obj.__dict__)
         if isinstance(obj, Build):
-            out['results'] = [Result.serialize(r) for r in obj.results]
+            out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
             try:
                 out['settings'] = obj.settings
             except RuntimeError:
