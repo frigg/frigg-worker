@@ -10,7 +10,7 @@ def read(*parts):
 
 setup(
     name='frigg-worker',
-    version='0.7.2',
+    version='0.8.0',
     description='A worker application that listens to the frigg broker '
                 'an pick up builds and build them.',
     long_description=read('README.rst'),
