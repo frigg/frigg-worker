@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-from copy import deepcopy
 import json
 import logging
 import os
+from copy import deepcopy
 
 from frigg import api
 from frigg.config import config, sentry

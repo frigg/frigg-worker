@@ -35,7 +35,7 @@ class FetcherTestCase(TestCase):
             content_type='application/json'
         )
 
-        task = fetch_task()
+        task = fetch_task(None, None)
         self.assertEqual(task['id'], 1)
 
     @patch('frigg_worker.fetcher.config', mock_config)
@@ -49,5 +49,5 @@ class FetcherTestCase(TestCase):
             content_type='application/json'
         )
 
-        task = fetch_task('http://dispatcher.io')
+        task = fetch_task('http://dispatcher.io', dispatcher_token=None)
         self.assertEqual(task['id'], 1)
