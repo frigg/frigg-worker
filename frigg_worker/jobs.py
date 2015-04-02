@@ -79,12 +79,12 @@ class Build(object):
 
     def run_tests(self):
         task = None
+        self.delete_working_dir()
         if not self.clone_repo():
             return self.error('git clone', 'Access denied')
 
         self.finished = False
         self.create_pending_tasks()
-        self.delete_working_dir()
 
         try:
             for task in self.settings['tasks']:
