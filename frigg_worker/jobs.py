@@ -89,6 +89,7 @@ class Build(object):
         try:
             for task in self.settings['tasks']:
                 self.run_task(task)
+                self.report_run()
 
             if self.settings['coverage']:
                 self.coverage = parse_coverage(
@@ -102,6 +103,7 @@ class Build(object):
             logger.error('Build nr. %s failed\n%s' % (self.id, str(e)))
         finally:
             self.delete_working_dir()
+            self.finished = True
             self.report_run()
             logger.info("Run of build %s finished." % self.id)
 

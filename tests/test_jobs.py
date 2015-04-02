@@ -64,6 +64,7 @@ class BuildTestCase(unittest.TestCase):
         mock_clone_repo.assert_called_once()
         mock_parse_coverage.assert_called_once_with('builds/1/coverage.xml', 'python')
         self.assertTrue(self.build.succeeded)
+        self.assertTrue(self.build.finished)
 
     @mock.patch('frigg_worker.jobs.Build.clone_repo')
     @mock.patch('frigg_worker.jobs.Build.run_task', side_effect=OSError())
@@ -74,6 +75,7 @@ class BuildTestCase(unittest.TestCase):
         mock_clone_repo.assert_called_once()
         mock_run_task.assert_called_once_with('tox')
         self.assertFalse(self.build.succeeded)
+        self.assertTrue(self.build.finished)
 
     @mock.patch('frigg_worker.jobs.Build.run_task')
     @mock.patch('frigg_worker.jobs.Build.clone_repo', lambda x: False)
