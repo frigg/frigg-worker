@@ -91,7 +91,7 @@ class Build(object):
                 self.run_task(task)
                 self.report_run()
 
-            if self.settings['coverage']:
+            if 'coverage' in self.settings:
                 self.coverage = parse_coverage(
                     os.path.join(self.working_directory, self.settings['coverage']['path']),
                     self.settings['coverage']['parser']
