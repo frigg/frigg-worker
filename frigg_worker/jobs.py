@@ -83,10 +83,10 @@ class Build(object):
         if not self.clone_repo():
             return self.error('git clone', 'Access denied')
 
-        self.finished = False
-        self.create_pending_tasks()
-
         try:
+            self.finished = False
+            self.create_pending_tasks()
+
             for task in self.settings['tasks']:
                 self.run_task(task)
                 self.report_run()
