@@ -4,7 +4,6 @@ import os
 
 import click
 from frigg.config import config, sentry
-from frigg.helpers import local_run
 
 from .fetcher import fetcher
 
@@ -26,7 +25,6 @@ def start(**kwargs):
 
     try:
         print("Starting frigg worker")
-        local_run("mkdir -p %s" % config('TMP_DIR'))
         fetcher(**kwargs)
     except Exception as e:
         logger.error(e)

@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import unittest
+from docker.manager import Docker
 
 import mock
 from frigg.helpers import ProcessResult
@@ -23,7 +24,8 @@ BUILD_SETTINGS = {
 
 class BuildTestCase(unittest.TestCase):
     def setUp(self):
-        self.build = Build(1, DATA)
+        with Docker() as docker:
+            self.build = Build(1, DATA, docker)
 
     def test_init(self):
         self.assertEquals(self.build.id, 1)

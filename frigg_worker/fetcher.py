@@ -8,6 +8,9 @@ from frigg.config import config
 
 from .jobs import Build
 
+
+from docker.manager import Docker
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,9 +24,11 @@ def fetcher(dispatcher_url=None, dispatcher_token=None):
 
 
 def start_build(task):
-    build = Build(task['id'], task)
-    logger.info('Starting %s' % task)
-    build.run_tests()
+
+    with Docker() as docker:
+        build = Build(task['id'], task, docker)
+        logger.info('Starting %s' % task)
+        build.run_tests()
 
 
 def fetch_task(dispatcher_url, dispatcher_token):

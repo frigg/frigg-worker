@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from frigg import api
 from frigg.config import config, sentry
-from frigg.helpers import cached_property, local_run
+from frigg.helpers import cached_property
 from frigg.projects import build_settings
 from frigg_coverage import parse_coverage
 
@@ -55,12 +55,13 @@ class Build(object):
     coverage = None
     finished = False
 
-    def __init__(self, build_id, obj):
+    def __init__(self, build_id, obj, docker):
         self.__dict__.update(obj)
         self.id = build_id
         self.results = {}
         self.tasks = []
         self.finished = False
+        self.docker = docker
 
     @property
     def working_directory(self):
@@ -75,7 +76,7 @@ class Build(object):
 
     @cached_property
     def settings(self):
-        return build_settings(self.working_directory)
+        return build_settings(self.working_directory, self.docker)
 
     def run_tests(self):
         task = None
@@ -116,10 +117,10 @@ class Build(object):
             'pr_id': self.pull_request_id
         }
         if self.pull_request_id is None:
-            clone = local_run("git clone --depth=%(depth)s --branch=%(branch)s "
-                              "%(url)s %(pwd)s" % command_options)
+            clone = self.docker.run("git clone --depth=%(depth)s --branch=%(branch)s "
+                                    "%(url)s %(pwd)s" % command_options)
         else:
-            clone = local_run(
+            clone = self.docker.run(
                 ("git clone --depth=%(depth)s %(url)s %(pwd)s && cd %(pwd)s "
                  "&& git fetch origin pull/%(pr_id)s/head:pull-%(pr_id)s "
                  "&& git checkout pull-%(pr_id)s") % command_options
@@ -130,7 +131,7 @@ class Build(object):
         return clone.succeeded
 
     def run_task(self, task_command):
-        run_result = local_run(task_command, self.working_directory)
+        run_result = self.docker.run(task_command, self.working_directory)
         self.results[task_command].update_result(run_result)
 
     def create_pending_tasks(self):
@@ -144,8 +145,8 @@ class Build(object):
             self.results[task] = Result(task)
 
     def delete_working_dir(self):
-        if os.path.exists(self.working_directory):
-            local_run("rm -rf %s" % self.working_directory)
+        if self.docker.directory_exist(self.working_directory):
+            self.docker.run("rm -rf %s" % self.working_directory)
 
     def error(self, task, message):
         self.errored = True
