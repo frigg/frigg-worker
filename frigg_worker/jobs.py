@@ -164,14 +164,17 @@ class Build(object):
             self.results[task] = result
 
     def report_run(self):
-        return api.report_run(self.id, json.dumps(self, default=Build.serializer)).status_code
+        try:
+            return api.report_run(self.id, json.dumps(self, default=Build.serializer)).status_code
+        except ConnectionError:
+            return 500
 
     @classmethod
     def serializer(cls, obj):
         out = deepcopy(obj.__dict__)
 
         if isinstance(obj, Build):
-            out = {'results': [Result.serialize(obj.results[key]) for key in obj.tasks]}
+            out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
             try:
                 out['settings'] = obj.settings
             except RuntimeError:
