@@ -94,8 +94,8 @@ class Build(object):
 
             if 'coverage' in self.settings:
                 coverage_file = os.path.join(self.working_directory,
-                                             self.settings['coverage']['path']),
-
+                                             self.settings['coverage']['path'])
+                
                 self.coverage = parse_coverage(
                     self.docker.read_file(coverage_file),
                     self.settings['coverage']['parser']

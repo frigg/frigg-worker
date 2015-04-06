@@ -58,14 +58,15 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.parse_coverage')
     @mock.patch('frigg_worker.jobs.Build.clone_repo')
     @mock.patch('frigg_worker.jobs.Build.run_task')
-    @mock.patch('docker.manager.Docker.read_file', lambda *x: 'builds/1/coverage.xml')
+    @mock.patch('docker.manager.Docker.read_file')
     @mock.patch('frigg_worker.jobs.Build.report_run', lambda *x: None)
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
-    def test_run_tests(self, mock_run_task, mock_clone_repo, mock_parse_coverage):
+    def test_run_tests(self, mock_read_file, mock_run_task, mock_clone_repo, mock_parse_coverage):
         self.build.run_tests()
         mock_run_task.assert_called_once_with('tox')
         mock_clone_repo.assert_called_once()
-        mock_parse_coverage.assert_called_once_with('builds/1/coverage.xml', 'python')
+        mock_read_file.assert_called_once_with('builds/1/coverage.xml')
+        mock_parse_coverage.assert_called_once()
         self.assertTrue(self.build.succeeded)
         self.assertTrue(self.build.finished)
 
