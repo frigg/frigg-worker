@@ -58,6 +58,7 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.parse_coverage')
     @mock.patch('frigg_worker.jobs.Build.clone_repo')
     @mock.patch('frigg_worker.jobs.Build.run_task')
+    @mock.patch('docker.manager.Docker.read_file', lambda *x: 'builds/1/coverage.xml')
     @mock.patch('frigg_worker.jobs.Build.report_run', lambda *x: None)
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
     def test_run_tests(self, mock_run_task, mock_clone_repo, mock_parse_coverage):
@@ -93,13 +94,14 @@ class BuildTestCase(unittest.TestCase):
         self.build.report_run()
         mock_report_run.assert_called_once_with(1, '{}')
 
-    @mock.patch('frigg_worker.jobs.local_run')
-    @mock.patch('os.path.exists', lambda x: True)
-    def test_delete_working_dir(self, mock_local_run):
+    @mock.patch('docker.manager.Docker.directory_exist')
+    @mock.patch('docker.manager.Docker.run')
+    def test_delete_working_dir(self, mock_local_run, mock_directory_exist):
         self.build.delete_working_dir()
+        mock_directory_exist.assert_called_once()
         mock_local_run.assert_called_once_with('rm -rf builds/1')
 
-    @mock.patch('frigg_worker.jobs.local_run')
+    @mock.patch('docker.manager.Docker.run')
     def test_run_task(self, mock_local_run):
         self.build.results['tox'] = Result('tox')
         self.build.run_task('tox')
@@ -108,14 +110,15 @@ class BuildTestCase(unittest.TestCase):
         self.assertEqual(self.build.results['tox'].task, 'tox')
         self.assertEqual(self.build.results['tox'].pending, False)
 
-    @mock.patch('frigg_worker.jobs.local_run')
+
+    @mock.patch('docker.manager.Docker.run')
     def test_clone_repo_regular(self, mock_local_run):
         self.build.clone_repo(1)
         mock_local_run.assert_called_once_with(
             'git clone --depth=1 --branch=master https://github.com/frigg/test-repo.git builds/1'
         )
 
-    @mock.patch('frigg_worker.jobs.local_run')
+    @mock.patch('docker.manager.Docker.run')
     def test_clone_repo_pull_request(self, mock_local_run):
         self.build.pull_request_id = 2
         self.build.clone_repo(1)
