@@ -4,12 +4,12 @@ import logging
 import os
 from copy import deepcopy
 
+import requests
 from frigg import api
 from frigg.config import config, sentry
 from frigg.helpers import cached_property
 from frigg.projects import build_settings
 from frigg_coverage import parse_coverage
-import requests
 
 logger = logging.getLogger(__name__)
 

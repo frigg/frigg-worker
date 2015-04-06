@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
 import unittest
-from docker.manager import Docker
 
 import mock
+from docker.manager import Docker
 from frigg.helpers import ProcessResult
 
 from frigg_worker.jobs import Build, Result

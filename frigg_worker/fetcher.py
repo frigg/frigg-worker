@@ -4,12 +4,10 @@ import random
 import time
 
 import requests
+from docker.manager import Docker
 from frigg.config import config
 
 from .jobs import Build
-
-
-from docker.manager import Docker
 
 logger = logging.getLogger(__name__)
 
