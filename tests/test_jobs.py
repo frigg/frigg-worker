@@ -111,7 +111,6 @@ class BuildTestCase(unittest.TestCase):
         self.assertEqual(self.build.results['tox'].task, 'tox')
         self.assertEqual(self.build.results['tox'].pending, False)
 
-
     @mock.patch('docker.manager.Docker.run')
     def test_clone_repo_regular(self, mock_local_run):
         self.build.clone_repo(1)

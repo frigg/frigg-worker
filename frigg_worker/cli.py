@@ -3,7 +3,7 @@ import logging.config
 import os
 
 import click
-from frigg.config import config, sentry
+from frigg.config import sentry
 
 from .fetcher import fetcher
 

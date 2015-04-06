@@ -9,6 +9,7 @@ from frigg.config import config, sentry
 from frigg.helpers import cached_property
 from frigg.projects import build_settings
 from frigg_coverage import parse_coverage
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class Build(object):
             if 'coverage' in self.settings:
                 coverage_file = os.path.join(self.working_directory,
                                              self.settings['coverage']['path'])
-                
+
                 self.coverage = parse_coverage(
                     self.docker.read_file(coverage_file),
                     self.settings['coverage']['parser']
@@ -166,7 +167,7 @@ class Build(object):
     def report_run(self):
         try:
             return api.report_run(self.id, json.dumps(self, default=Build.serializer)).status_code
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             return 500
 
     @classmethod
