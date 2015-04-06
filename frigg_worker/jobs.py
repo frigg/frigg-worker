@@ -93,8 +93,11 @@ class Build(object):
                 self.report_run()
 
             if 'coverage' in self.settings:
+                coverage_file = os.path.join(self.working_directory,
+                                             self.settings['coverage']['path']),
+
                 self.coverage = parse_coverage(
-                    os.path.join(self.working_directory, self.settings['coverage']['path']),
+                    self.docker.read_file(coverage_file),
                     self.settings['coverage']['parser']
                 )
 
@@ -106,6 +109,7 @@ class Build(object):
             self.delete_working_dir()
             self.finished = True
             self.report_run()
+
             logger.info("Run of build %s finished." % self.id)
 
     def clone_repo(self, depth=1):
@@ -125,6 +129,7 @@ class Build(object):
                  "&& git fetch origin pull/%(pr_id)s/head:pull-%(pr_id)s "
                  "&& git checkout pull-%(pr_id)s") % command_options
             )
+
         if not clone.succeeded:
             message = "Access denied to %s/%s" % (self.owner, self.name)
             logger.error(message)
@@ -164,10 +169,12 @@ class Build(object):
     @classmethod
     def serializer(cls, obj):
         out = deepcopy(obj.__dict__)
+
         if isinstance(obj, Build):
-            out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
+            out = {'results': [Result.serialize(obj.results[key]) for key in obj.tasks]}
             try:
                 out['settings'] = obj.settings
             except RuntimeError:
                 pass
+
         return out
