@@ -5,6 +5,7 @@ import mock
 from docker.manager import Docker
 from frigg.helpers import ProcessResult
 
+from frigg_worker.fetcher import evaluate_options
 from frigg_worker.jobs import Build, Result
 
 DATA = {
@@ -21,11 +22,18 @@ BUILD_SETTINGS = {
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
 }
 
+WORKER_OPTIONS = {
+    'dispatcher_url': 'http://example.com/dispatch',
+    'dispatcher_token': 'tokened',
+    'hq_url': 'http://example.com/hq',
+    'hq_token': 'tokened',
+}
+
 
 class BuildTestCase(unittest.TestCase):
     def setUp(self):
         with Docker() as docker:
-            self.build = Build(1, DATA, docker)
+            self.build = Build(1, DATA, docker, evaluate_options(WORKER_OPTIONS))
 
     def test_init(self):
         self.assertEquals(self.build.id, 1)
@@ -88,7 +96,7 @@ class BuildTestCase(unittest.TestCase):
         self.assertFalse(mock_run_task.called)
         self.assertFalse(self.build.succeeded)
 
-    @mock.patch('frigg_worker.jobs.api.report_run')
+    @mock.patch('frigg_worker.api.APIWrapper.report_run')
     @mock.patch('frigg_worker.jobs.Build.serializer', lambda *x: {})
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {})
     def test_report_run(self, mock_report_run):
@@ -135,6 +143,9 @@ class BuildTestCase(unittest.TestCase):
         self.assertEqual(serialized['owner'], self.build.owner)
         self.assertEqual(serialized['name'], self.build.name)
         self.assertEqual(serialized['results'], [])
+        self.assertNotIn('worker_options', serialized)
+        self.assertNotIn('docker', serialized)
+        self.assertNotIn('api', serialized)
 
         self.build.tasks.append('tox')
         self.build.results['tox'] = Result('tox')

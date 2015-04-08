@@ -20,6 +20,8 @@ def load_logging_config():
 @click.command()
 @click.option('--dispatcher-url', default=None, help='Url to the dispatcher, overrides settings')
 @click.option('--dispatcher-token', default=None, help='Token for dispatcher, overrides settings')
+@click.option('--hq-url', default=None, help='Url for frigg-hq, overrides settings')
+@click.option('--hq-token', default=None, help='Token for frigg-hq, overrides settings')
 def start(**kwargs):
     load_logging_config()
 
@@ -27,6 +29,7 @@ def start(**kwargs):
         print("Starting frigg worker")
         fetcher(**kwargs)
     except Exception as e:
+        print(e)
         logger.error(e)
         sentry.captureException()
 
