@@ -17,7 +17,12 @@ class CLITestCase(TestCase):
         result = runner.invoke(start, [])
         self.assertTrue('Starting frigg worker' in result.output)
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once_with(dispatcher_token=None, dispatcher_url=None)
+        mock_fetcher.assert_called_once_with(
+            dispatcher_token=None,
+            dispatcher_url=None,
+            hq_token=None,
+            hq_url=None
+        )
 
     @patch('frigg_worker.cli.fetcher')
     def test_start_with_dispatcher_options(self, mock_fetcher):
@@ -27,7 +32,22 @@ class CLITestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
         mock_fetcher.assert_called_once_with(
             dispatcher_token='to',
-            dispatcher_url='http://frigg.io'
+            dispatcher_url='http://frigg.io',
+            hq_token=None,
+            hq_url=None
+        )
+
+    @patch('frigg_worker.cli.fetcher')
+    def test_start_with_hq_options(self, mock_fetcher):
+        runner = CliRunner()
+        result = runner.invoke(start, ['--hq-url=http://frigg.io', '--hq-token=to'])
+        self.assertTrue('Starting frigg worker' in result.output)
+        self.assertEqual(result.exit_code, 0)
+        mock_fetcher.assert_called_once_with(
+            dispatcher_token=None,
+            dispatcher_url=None,
+            hq_url='http://frigg.io',
+            hq_token='to'
         )
 
     @patch('frigg_worker.cli.fetcher', side_effect=OSError('os-error'))

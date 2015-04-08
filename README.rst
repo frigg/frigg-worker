@@ -13,18 +13,28 @@ Setup
     ~/frigg-worker/bin/pip install frigg-worker
     ~/frigg-worker/bin/frigg-worker
 
-Supervisor config
-~~~~~~~~~~~~~~~~~
+Usage
+-----
 
-.. code-block:: ini
+::
 
-    [program:frigg-worker]
-    directory=/home/frigg/
-    command=/home/frigg/frigg-worker/bin/frigg-worker
-    autostart=true
-    autorestart=true
-    redirect_stderr=true
-    user=frigg
+    $ frigg_worker --help
+    Usage: frigg_worker [OPTIONS]
+
+    Options:
+      --dispatcher-url TEXT    Url to the dispatcher, overrides settings
+      --dispatcher-token TEXT  Token for dispatcher, overrides settings
+      --hq-url TEXT            Url for frigg-hq, overrides settings
+      --hq-token TEXT          Token for frigg-hq, overrides settings
+      --help                   Show this message and exit.
+
+
+Running frigg-worker from source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    python -m frigg_worker.cli
 
 --------------
 

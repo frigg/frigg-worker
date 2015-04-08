@@ -5,11 +5,12 @@ import os
 from copy import deepcopy
 
 import requests
-from frigg import api
 from frigg.config import config, sentry
 from frigg.helpers import cached_property
 from frigg.projects import build_settings
 from frigg_coverage import parse_coverage
+
+from . import api
 
 logger = logging.getLogger(__name__)
 
@@ -56,13 +57,16 @@ class Build(object):
     coverage = None
     finished = False
 
-    def __init__(self, build_id, obj, docker):
+    def __init__(self, build_id, obj, docker, worker_options=None):
         self.__dict__.update(obj)
         self.id = build_id
         self.results = {}
         self.tasks = []
         self.finished = False
         self.docker = docker
+        self.worker_options = worker_options
+        if worker_options:
+            self.api = api.APIWrapper(worker_options)
 
     @property
     def working_directory(self):
@@ -166,7 +170,8 @@ class Build(object):
 
     def report_run(self):
         try:
-            return api.report_run(self.id, json.dumps(self, default=Build.serializer)).status_code
+            return self.api.report_run(self.id, json.dumps(self, default=Build.serializer))\
+                           .status_code
         except requests.exceptions.ConnectionError:
             return 500
 
@@ -175,6 +180,10 @@ class Build(object):
         out = deepcopy(obj.__dict__)
 
         if isinstance(obj, Build):
+            for key in ['worker_options', 'api', 'docker']:
+                if key in out:
+                    del out[key]
+
             out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
             try:
                 out['settings'] = obj.settings
