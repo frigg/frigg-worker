@@ -21,7 +21,8 @@ class CLITestCase(TestCase):
             dispatcher_token=None,
             dispatcher_url=None,
             hq_token=None,
-            hq_url=None
+            hq_url=None,
+            slack_url=None
         )
 
     @patch('frigg_worker.cli.fetcher')
@@ -34,7 +35,8 @@ class CLITestCase(TestCase):
             dispatcher_token='to',
             dispatcher_url='http://frigg.io',
             hq_token=None,
-            hq_url=None
+            hq_url=None,
+            slack_url=None
         )
 
     @patch('frigg_worker.cli.fetcher')
@@ -47,7 +49,8 @@ class CLITestCase(TestCase):
             dispatcher_token=None,
             dispatcher_url=None,
             hq_url='http://frigg.io',
-            hq_token='to'
+            hq_token='to',
+            slack_url=None
         )
 
     @patch('frigg_worker.cli.fetcher', side_effect=OSError('os-error'))

@@ -22,12 +22,12 @@ Usage
     Usage: frigg_worker [OPTIONS]
 
     Options:
-      --dispatcher-url TEXT    Url to the dispatcher, overrides settings
+      --dispatcher-url TEXT    URL to the dispatcher, overrides settings
       --dispatcher-token TEXT  Token for dispatcher, overrides settings
-      --hq-url TEXT            Url for frigg-hq, overrides settings
+      --hq-url TEXT            URl for frigg-hq, overrides settings
       --hq-token TEXT          Token for frigg-hq, overrides settings
+      --slack-url TEXT         URL for incoming webhook in slack
       --help                   Show this message and exit.
-
 
 Running frigg-worker from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
