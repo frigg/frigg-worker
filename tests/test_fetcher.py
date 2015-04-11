@@ -3,6 +3,7 @@ import json
 from unittest import TestCase
 
 import responses
+import mock
 from mock import patch
 
 from frigg_worker.fetcher import fetch_task, start_build
@@ -17,6 +18,7 @@ def mock_config(key):
 
 class FetcherTestCase(TestCase):
 
+    @mock.patch('docker.manager.Docker')
     @patch('frigg_worker.jobs.Build.run_tests')
     def test_start_build(self, mock_runtests):
         start_build({
