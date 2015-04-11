@@ -18,10 +18,11 @@ def load_logging_config():
 
 
 @click.command()
-@click.option('--dispatcher-url', default=None, help='Url to the dispatcher, overrides settings')
+@click.option('--dispatcher-url', default=None, help='URL to the dispatcher, overrides settings')
 @click.option('--dispatcher-token', default=None, help='Token for dispatcher, overrides settings')
-@click.option('--hq-url', default=None, help='Url for frigg-hq, overrides settings')
+@click.option('--hq-url', default=None, help='URl for frigg-hq, overrides settings')
 @click.option('--hq-token', default=None, help='Token for frigg-hq, overrides settings')
+@click.option('--slack-url', default=None, help='URL for incoming webhook in slack')
 def start(**kwargs):
     load_logging_config()
 
