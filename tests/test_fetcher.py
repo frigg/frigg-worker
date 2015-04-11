@@ -17,12 +17,17 @@ def mock_config(key):
 
 class FetcherTestCase(TestCase):
 
+    @patch('docker.manager.Docker.start')
+    @patch('docker.manager.Docker.stop')
     @patch('frigg_worker.jobs.Build.run_tests')
-    def test_start_build(self, mock_runtests):
+    def test_start_build(self, mock_runtests, mock_docker_stop, mock_docker_start):
         start_build({
             'id': 1,
         }, {})
+
         self.assertTrue(mock_runtests.called)
+        self.assertTrue(mock_docker_start.called)
+        self.assertTrue(mock_docker_stop.called)
 
     @patch('frigg_worker.fetcher.config', mock_config)
     @responses.activate

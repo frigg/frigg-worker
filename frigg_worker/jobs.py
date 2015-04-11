@@ -7,8 +7,9 @@ from copy import deepcopy
 import requests
 from frigg.config import config, sentry
 from frigg.helpers import cached_property
-from frigg.projects import build_settings
 from frigg_coverage import parse_coverage
+
+from frigg_worker.build_helpers import build_settings
 
 from . import api
 
@@ -125,6 +126,7 @@ class Build(object):
             'branch': self.branch,
             'pr_id': self.pull_request_id
         }
+
         if self.pull_request_id is None:
             clone = self.docker.run("git clone --depth=%(depth)s --branch=%(branch)s "
                                     "%(url)s %(pwd)s" % command_options)

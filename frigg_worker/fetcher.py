@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def fetcher(**options):
     options = evaluate_options(options)
     notify_of_upstart(options)
-    while True:
+    while options['dispatcher_url']:
         task = fetch_task(options['dispatcher_url'], options['dispatcher_token'])
         if task:
             start_build(task, options)
@@ -27,7 +27,7 @@ def fetcher(**options):
 
 def start_build(task, options):
 
-    with Docker() as docker:
+    with Docker(image='frigg/frigg-test-base:latest') as docker:
         build = Build(task['id'], task, docker=docker, worker_options=options)
         logger.info('Starting %s' % task)
         build.run_tests()

@@ -32,8 +32,8 @@ WORKER_OPTIONS = {
 
 class BuildTestCase(unittest.TestCase):
     def setUp(self):
-        with Docker() as docker:
-            self.build = Build(1, DATA, docker, evaluate_options(WORKER_OPTIONS))
+        self.docker = Docker()
+        self.build = Build(1, DATA, self.docker, evaluate_options(WORKER_OPTIONS))
 
     def test_init(self):
         self.assertEquals(self.build.id, 1)
@@ -53,7 +53,10 @@ class BuildTestCase(unittest.TestCase):
         self.assertEquals(self.build.results['tox'].log, 'Command not found')
         self.assertEquals(self.build.results['tox'].task, 'tox')
 
-    def test_succeeded(self):
+    @mock.patch('docker.manager.Docker.start')
+    @mock.patch('docker.manager.Docker.stop')
+    @mock.patch('docker.manager.Docker.run')
+    def test_succeeded(self, mock_docker_run, mock_docker_stop, mock_docker_start):
         success = Result('tox')
         success.succeeded = True
         failure = Result('flake8')
@@ -63,13 +66,17 @@ class BuildTestCase(unittest.TestCase):
         self.build.results['flake8'] = failure
         self.assertFalse(self.build.succeeded)
 
+    @mock.patch('docker.manager.Docker.start')
+    @mock.patch('docker.manager.Docker.stop')
     @mock.patch('frigg_worker.jobs.parse_coverage')
     @mock.patch('frigg_worker.jobs.Build.clone_repo')
     @mock.patch('frigg_worker.jobs.Build.run_task')
     @mock.patch('docker.manager.Docker.read_file')
     @mock.patch('frigg_worker.jobs.Build.report_run', lambda *x: None)
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
-    def test_run_tests(self, mock_read_file, mock_run_task, mock_clone_repo, mock_parse_coverage):
+    def test_run_tests(self, mock_read_file, mock_run_task, mock_clone_repo,
+                       mock_parse_coverage, mock_docker_stop, mock_docker_start):
+
         self.build.run_tests()
         mock_run_task.assert_called_once_with('tox')
         mock_clone_repo.assert_called_once()
@@ -126,8 +133,10 @@ class BuildTestCase(unittest.TestCase):
             'git clone --depth=1 --branch=master https://github.com/frigg/test-repo.git builds/1'
         )
 
+    @mock.patch('docker.manager.Docker.start')
+    @mock.patch('docker.manager.Docker.stop')
     @mock.patch('docker.manager.Docker.run')
-    def test_clone_repo_pull_request(self, mock_local_run):
+    def test_clone_repo_pull_request(self, mock_local_run, mock_docker_stop, mock_docker_start):
         self.build.pull_request_id = 2
         self.build.clone_repo(1)
         mock_local_run.assert_called_once_with(
