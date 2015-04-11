@@ -1,9 +1,8 @@
 # -*- coding: utf8 -*-
 import logging
-import yaml
-
 from os.path import join
 
+import yaml
 from frigg.helpers import detect_test_runners
 
 logger = logging.getLogger(__name__)
