@@ -56,7 +56,7 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('docker.manager.Docker.start')
     @mock.patch('docker.manager.Docker.stop')
     @mock.patch('docker.manager.Docker.run')
-    def test_succeeded(self, docker_run, docker_stop, docker_start):
+    def test_succeeded(self, mock_docker_run, mock_docker_stop, mock_docker_start):
         success = Result('tox')
         success.succeeded = True
         failure = Result('flake8')
@@ -75,7 +75,7 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.Build.report_run', lambda *x: None)
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
     def test_run_tests(self, mock_read_file, mock_run_task, mock_clone_repo,
-                       mock_parse_coverage, docker_stop, docker_start):
+                       mock_parse_coverage, mock_docker_stop, mock_docker_start):
 
         self.build.run_tests()
         mock_run_task.assert_called_once_with('tox')
