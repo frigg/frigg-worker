@@ -19,6 +19,7 @@ DATA = {
 
 BUILD_SETTINGS = {
     'tasks': ['tox'],
+    'services': [],
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
 }
 
@@ -76,7 +77,6 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
     def test_run_tests(self, mock_read_file, mock_run_task, mock_clone_repo,
                        mock_parse_coverage, mock_docker_stop, mock_docker_start):
-
         self.build.run_tests()
         mock_run_task.assert_called_once_with('tox')
         mock_clone_repo.assert_called_once()
@@ -88,7 +88,8 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.Build.clone_repo')
     @mock.patch('frigg_worker.jobs.Build.run_task', side_effect=OSError())
     @mock.patch('frigg_worker.jobs.Build.report_run', lambda *x: None)
-    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'], 'coverage': None})
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'], 'services': [],
+                                                                'coverage': None})
     def test_run_tests_fail_task(self, mock_run_task, mock_clone_repo):
         self.build.run_tests()
         mock_clone_repo.assert_called_once()
@@ -167,6 +168,60 @@ class BuildTestCase(unittest.TestCase):
         self.build.results['tox'].update_result(result)
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
                                                   'return_code': 0, 'succeeded': True}])
+
+    @mock.patch('docker.manager.Docker.start')
+    @mock.patch('docker.manager.Docker.stop')
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'],
+                                                                'services': [],
+                                                                'coverage': None})
+    def test_start_no_services(self, mock_docker_run, mock_docker_stop, mock_docker_start):
+        self.build.start_services()
+        self.assertFalse(mock_docker_run.called)
+
+
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'],
+                                                                'services': ['redis-server'],
+                                                                'coverage': None})
+    def test_start_one_service(self, mock_docker_run):
+        self.build.start_services()
+        mock_docker_run.assert_called_once_with("sudo service redis-server start")
+
+
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'],
+                                                                'services': ['redis-server',
+                                                                             'postgresql'],
+                                                                'coverage': None})
+    def test_start_two_services(self, mock_docker_run):
+        self.build.start_services()
+
+        calls = [
+            mock.call("sudo service redis-server start"),
+            mock.call("sudo service postgresql start")
+        ]
+
+        mock_docker_run.assert_has_calls(calls, any_order=True)
+
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'],
+                                                                'services': ['redis-server',
+                                                                             'postgresql',
+                                                                             'nginx',
+                                                                             'mongodb'],
+                                                                'coverage': None})
+    def test_start_four_services_in_order(self, mock_docker_run):
+        self.build.start_services()
+
+        calls = [
+            mock.call("sudo service redis-server start"),
+            mock.call("sudo service postgresql start"),
+            mock.call("sudo service nginx start"),
+            mock.call("sudo service mongodb start"),
+        ]
+
+        mock_docker_run.assert_has_calls(calls, any_order=False)
 
 
 class ResultTestCase(unittest.TestCase):
