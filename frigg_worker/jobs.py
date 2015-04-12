@@ -85,9 +85,8 @@ class Build(object):
         return build_settings(self.working_directory, self.docker)
 
     def start_services(self):
-        if 'services' in self.settings:
-            for service in self.settings['services']:
-                self.docker.run("sudo service {0} start".format(service))
+        for service in self.settings['services']:
+            self.docker.run("sudo service {0} start".format(service))
 
     def run_tests(self):
         self.start_services()
