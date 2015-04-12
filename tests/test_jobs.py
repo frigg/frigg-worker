@@ -183,9 +183,7 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('docker.manager.Docker.start')
     @mock.patch('docker.manager.Docker.stop')
     @mock.patch('docker.manager.Docker.run')
-    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'],
-                                                                'services': [],
-                                                                'coverage': None})
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_start_no_services(self, mock_docker_run, mock_docker_stop, mock_docker_start):
         self.build.start_services()
         self.assertFalse(mock_docker_run.called)
@@ -194,8 +192,7 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_ONE_SERVICE)
     def test_start_one_service(self, mock_docker_run):
         self.build.start_services()
-        mock_docker_run.assert_called_once_with("sudo service redis-server start")
-
+        mock_docker_run.assert_called_once_with('sudo service redis-server start')
 
     @mock.patch('docker.manager.Docker.run')
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_FOUR_SERVICES)
@@ -203,10 +200,10 @@ class BuildTestCase(unittest.TestCase):
         self.build.start_services()
 
         mock_docker_run.assert_has_calls([
-            mock.call("sudo service redis-server start"),
-            mock.call("sudo service postgresql start"),
-            mock.call("sudo service nginx start"),
-            mock.call("sudo service mongodb start"),
+            mock.call('sudo service redis-server start'),
+            mock.call('sudo service postgresql start'),
+            mock.call('sudo service nginx start'),
+            mock.call('sudo service mongodb start'),
         ])
 
 
