@@ -17,9 +17,22 @@ DATA = {
     'name': 'test-repo',
 }
 
-BUILD_SETTINGS = {
+BUILD_SETTINGS_WITH_NO_SERVICES = {
     'tasks': ['tox'],
+    'services': [],
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
+}
+
+BUILD_SETTINGS_ONE_SERVICE = {
+    'tasks': ['tox'],
+    'services': ['redis-server'],
+    'coverage': None,
+}
+
+BUILD_SETTINGS_FOUR_SERVICES = {
+    'tasks': ['tox'],
+    'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
+    'coverage': None,
 }
 
 WORKER_OPTIONS = {
@@ -73,10 +86,9 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.Build.run_task')
     @mock.patch('docker.manager.Docker.read_file')
     @mock.patch('frigg_worker.jobs.Build.report_run', lambda *x: None)
-    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_run_tests(self, mock_read_file, mock_run_task, mock_clone_repo,
                        mock_parse_coverage, mock_docker_stop, mock_docker_start):
-
         self.build.run_tests()
         mock_run_task.assert_called_once_with('tox')
         mock_clone_repo.assert_called_once()
@@ -88,7 +100,7 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.Build.clone_repo')
     @mock.patch('frigg_worker.jobs.Build.run_task', side_effect=OSError())
     @mock.patch('frigg_worker.jobs.Build.report_run', lambda *x: None)
-    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {'tasks': ['tox'], 'coverage': None})
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_run_tests_fail_task(self, mock_run_task, mock_clone_repo):
         self.build.run_tests()
         mock_clone_repo.assert_called_once()
@@ -144,7 +156,7 @@ class BuildTestCase(unittest.TestCase):
             'git fetch origin pull/2/head:pull-2 && git checkout pull-2'
         )
 
-    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS)
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_serializer(self):
         serialized = Build.serializer(self.build)
         self.assertEqual(serialized['id'], self.build.id)
@@ -167,6 +179,32 @@ class BuildTestCase(unittest.TestCase):
         self.build.results['tox'].update_result(result)
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
                                                   'return_code': 0, 'succeeded': True}])
+
+    @mock.patch('docker.manager.Docker.start')
+    @mock.patch('docker.manager.Docker.stop')
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
+    def test_start_no_services(self, mock_docker_run, mock_docker_stop, mock_docker_start):
+        self.build.start_services()
+        self.assertFalse(mock_docker_run.called)
+
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_ONE_SERVICE)
+    def test_start_one_service(self, mock_docker_run):
+        self.build.start_services()
+        mock_docker_run.assert_called_once_with('sudo service redis-server start')
+
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_FOUR_SERVICES)
+    def test_start_four_services_in_order(self, mock_docker_run):
+        self.build.start_services()
+
+        mock_docker_run.assert_has_calls([
+            mock.call('sudo service redis-server start'),
+            mock.call('sudo service postgresql start'),
+            mock.call('sudo service nginx start'),
+            mock.call('sudo service mongodb start'),
+        ])
 
 
 class ResultTestCase(unittest.TestCase):

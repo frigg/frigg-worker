@@ -84,11 +84,17 @@ class Build(object):
     def settings(self):
         return build_settings(self.working_directory, self.docker)
 
+    def start_services(self):
+        for service in self.settings['services']:
+            self.docker.run("sudo service {0} start".format(service))
+
     def run_tests(self):
         task = None
         self.delete_working_dir()
         if not self.clone_repo():
             return self.error('git clone', 'Access denied')
+
+        self.start_services()
 
         try:
             self.finished = False

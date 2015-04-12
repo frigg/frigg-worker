@@ -28,6 +28,7 @@ def build_settings(directory, docker):
 
     settings = {
         'webhooks': [],
+        'services': []
     }
 
     if path is not None:
