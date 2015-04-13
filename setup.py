@@ -22,7 +22,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'click==4.0',
-        'frigg-coverage==0.5.0',
+        'frigg-coverage==1.0.0',
         'frigg-common==0.2.0',
         'raven==5.2.0'
     ],
