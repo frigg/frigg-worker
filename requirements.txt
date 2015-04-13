@@ -3,9 +3,9 @@
 
 click==4.0
 frigg-common==0.2.0
-frigg-coverage==0.5.0
+frigg-coverage==1.0.0
 raven==5.2.0
-docker-wrapper==0.2.0
+docker-wrapper==0.2.1
 
 # testing tools
 pytest
