@@ -84,10 +84,6 @@ class Build(object):
     def settings(self):
         return build_settings(self.working_directory, self.docker)
 
-    def start_services(self):
-        for service in self.settings['services']:
-            self.docker.run("sudo service {0} start".format(service))
-
     def run_tests(self):
         task = None
         self.delete_working_dir()
@@ -147,6 +143,10 @@ class Build(object):
             message = "Access denied to %s/%s" % (self.owner, self.name)
             logger.error(message)
         return clone.succeeded
+
+    def start_services(self):
+        for service in self.settings['services']:
+            self.docker.run("sudo service {0} start".format(service))
 
     def run_task(self, task_command):
         run_result = self.docker.run(task_command, self.working_directory)
