@@ -37,6 +37,15 @@ class CLITestCase(TestCase):
         self.assertEqual(mock_fetcher.call_args_list[0][1]['hq_token'], 'to')
         self.assertEqual(mock_fetcher.call_args_list[0][1]['hq_url'], 'http://frigg.io')
 
+    @patch('frigg_worker.cli.fetcher')
+    def test_start_with_loglevel(self, mock_fetcher):
+        runner = CliRunner()
+        result = runner.invoke(start, ['--hq-url=http://frigg.io', '--loglevel=ERROR'])
+        self.assertFalse('Starting frigg worker' in result.output)
+        self.assertEqual(result.exit_code, 0)
+        mock_fetcher.assert_called_once()
+        self.assertEqual(mock_fetcher.call_args_list[0][1]['loglevel'], 'ERROR')
+
     @patch('frigg_worker.cli.fetcher', side_effect=OSError('os-error'))
     def test_start_with_error(self, mock_fetcher):
         runner = CliRunner()

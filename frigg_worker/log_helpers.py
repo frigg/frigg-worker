@@ -8,6 +8,7 @@ def load_logging_config(options):
     sentry = {}
     handlers = ['console']
     sentry_handler = []
+    frigg_level = options['loglevel']
     if options['sentry_dsn']:
         handlers = ['console', 'sentry']
         sentry_handler = ['sentry']
@@ -48,17 +49,17 @@ def load_logging_config(options):
             },
             'frigg': {
                 'handlers': handlers,
-                'level': 'DEBUG',
+                'level': frigg_level,
                 'propagate': True,
             },
             'frigg_coverage': {
                 'handlers': handlers,
-                'level': 'DEBUG',
+                'level': frigg_level,
                 'propagate': True,
             },
             'frigg_worker': {
                 'handlers': handlers,
-                'level': 'DEBUG',
+                'level': frigg_level,
                 'propagate': True,
             },
         }

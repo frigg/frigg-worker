@@ -17,6 +17,7 @@ logger = logging.getLogger('frigg_worker.cli')
 @click.option('--hq-url', default=None, help='URl for frigg-hq, overrides settings')
 @click.option('--hq-token', default=None, help='Token for frigg-hq, overrides settings')
 @click.option('--slack-url', default=None, help='URL for incoming webhook in slack')
+@click.option('--loglevel', default='DEBUG', help='Set log level for frigg-packages')
 def start(**options):
     options = evaluate_options(options)
     logging.config.dictConfig(load_logging_config(options))
