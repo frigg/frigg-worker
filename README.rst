@@ -27,6 +27,7 @@ Usage
       --hq-url TEXT            URl for frigg-hq, overrides settings
       --hq-token TEXT          Token for frigg-hq, overrides settings
       --slack-url TEXT         URL for incoming webhook in slack
+      --loglevel TEXT          Set log level for frigg-packages
       --help                   Show this message and exit.
 
 Running frigg-worker from source
