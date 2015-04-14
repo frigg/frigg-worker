@@ -7,6 +7,18 @@ logger = logging.getLogger(__name__)
 
 
 def load_logging_config():
+    sentry = {}
+    handlers = ['console']
+    sentry_handler = []
+    if config('SENTRY_DSN'):
+        handlers = ['console', 'sentry']
+        sentry_handler = ['sentry']
+        sentry = {
+            'level': 'ERROR',
+            'class': 'raven.handlers.logging.SentryHandler',
+            'dsn': config('SENTRY_DSN')
+        }
+
     return {
         'version': 1,
         'disable_existing_loggers': True,
@@ -23,36 +35,32 @@ def load_logging_config():
                 'class': 'logging.StreamHandler',
                 'formatter': 'console'
             },
-            'sentry': {
-                'level': 'ERROR',
-                'class': 'raven.handlers.logging.SentryHandler',
-                'dsn': config('SENTRY_DSN')
-            },
+            'sentry': sentry,
         },
 
         'loggers': {
             '': {
-                'handlers': ['sentry'],
+                'handlers': sentry_handler,
                 'level': 'ERROR',
                 'propagate': True,
             },
             'requests': {
-                'handlers': ['console', 'sentry'],
+                'handlers': handlers,
                 'level': 'ERROR',
                 'propagate': True,
             },
             'frigg': {
-                'handlers': ['console', 'sentry'],
+                'handlers': handlers,
                 'level': 'DEBUG',
                 'propagate': True,
             },
             'frigg_coverage': {
-                'handlers': ['console', 'sentry'],
+                'handlers': handlers,
                 'level': 'DEBUG',
                 'propagate': True,
             },
             'frigg_worker': {
-                'handlers': ['console', 'sentry'],
+                'handlers': handlers,
                 'level': 'DEBUG',
                 'propagate': True,
             },

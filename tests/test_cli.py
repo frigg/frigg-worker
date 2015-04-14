@@ -75,8 +75,3 @@ class LoggingConfigLoaderTestCase(TestCase):
 
     def test_load_logging_config(self):
         load_logging_config()
-
-    @patch('os.path.join', lambda *x: 'non-existing-path')
-    def test_load_logging_config_failure(self):
-        load_logging_config()
-        self.assertTrue('There is a problem with the logging config:\n' in sys.stdout.getvalue())
