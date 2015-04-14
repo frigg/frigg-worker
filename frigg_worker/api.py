@@ -27,11 +27,11 @@ class APIWrapper(object):
 
     def report_run(self, build_id, build):
         response = self.post(self.url, data=build)
-        logger.info('Reported build to hq, hq response status-code: %s, data:\n%s' % (
+        logger.info('Reported build to hq, hq response status-code: {0}, data:\n{1}'.format(
             response.status_code,
             build
         ))
         if response.status_code != 200:
-            with open('build-%s-hq-response.html' % build_id, 'w') as f:
+            with open('build-{0}-hq-response.html'.format(build_id), 'w') as f:
                 f.write(response.text)
         return response

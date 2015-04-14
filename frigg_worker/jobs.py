@@ -95,7 +95,6 @@ class Build(object):
         try:
             self.finished = False
             self.create_pending_tasks()
-
             for task in self.settings['tasks']:
                 self.run_task(task)
                 self.report_run()
@@ -112,42 +111,38 @@ class Build(object):
         except Exception as e:
             self.error(task or '', e)
             sentry.captureException()
-            logger.error('Build nr. %s failed\n%s' % (self.id, str(e)))
+            logger.error('Build nr. {build.id} failed\n{0}'.format(str(e), build=self))
         finally:
             self.delete_working_dir()
             self.finished = True
             self.report_run()
 
-            logger.info('Run of build %s finished.' % self.id)
+            logger.info('Run of build {build.id} finished.'.format(build=self))
 
     def clone_repo(self, depth=1):
-        command_options = {
-            'depth': depth,
-            'url': self.clone_url,
-            'pwd': self.working_directory,
-            'branch': self.branch,
-            'pr_id': self.pull_request_id
-        }
-
         if self.pull_request_id is None:
-            clone = self.docker.run('git clone --depth=%(depth)s --branch=%(branch)s '
-                                    '%(url)s %(pwd)s' % command_options)
+            command = (
+                'git clone --depth={depth} --branch={build.branch} {build.clone_url} '
+                '{build.working_directory}'
+            )
         else:
-            clone = self.docker.run(
-                ('git clone --depth=%(depth)s %(url)s %(pwd)s && cd %(pwd)s '
-                 '&& git fetch origin pull/%(pr_id)s/head:pull-%(pr_id)s '
-                 '&& git checkout pull-%(pr_id)s') % command_options
+            command = (
+                'git clone --depth={depth} {build.clone_url} {build.working_directory} && '
+                'cd {build.working_directory} && '
+                'git fetch origin pull/{build.pull_request_id}/head:pull-{build.pull_request_id} &&'
+                ' git checkout pull-{build.pull_request_id}'
             )
 
+        clone = self.docker.run(command.format(build=self, depth=depth))
         if not clone.succeeded:
-            message = 'Access denied to %s/%s' % (self.owner, self.name)
+            message = 'Access denied to {build.owner}/{build.name}'.format(build=self)
             logger.error(message)
         return clone.succeeded
 
     def start_services(self):
         for service in self.settings['services']:
             if not self.docker.run('sudo service {0} start'.format(service)).succeeded:
-                logger.warning('Service "{}" did not start.'.format(service))
+                logger.warning('Service "{0}" did not start.'.format(service))
 
     def run_task(self, task_command):
         run_result = self.docker.run(task_command, self.working_directory)
@@ -165,7 +160,7 @@ class Build(object):
 
     def delete_working_dir(self):
         if self.docker.directory_exist(self.working_directory):
-            self.docker.run("rm -rf %s" % self.working_directory)
+            self.docker.run('rm -rf {build.working_directory}'.format(build=self))
 
     def error(self, task, message):
         self.errored = True
@@ -179,8 +174,8 @@ class Build(object):
 
     def report_run(self):
         try:
-            return self.api.report_run(self.id, json.dumps(self, default=Build.serializer))\
-                           .status_code
+            return self.api.report_run(self.id, json.dumps(self, default=Build.serializer)) \
+                .status_code
         except requests.exceptions.ConnectionError:
             return 500
 

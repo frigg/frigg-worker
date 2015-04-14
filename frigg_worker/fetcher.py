@@ -27,12 +27,12 @@ def start_build(task, options):
 
     with Docker(image='frigg/frigg-test-base:latest') as docker:
         build = Build(task['id'], task, docker=docker, worker_options=options)
-        logger.info('Starting %s' % task)
+        logger.info('Starting {0}'.format(task))
         build.run_tests()
 
 
 def fetch_task(dispatcher_url, dispatcher_token):
-    logger.debug('Fetching new job from {}'.format(dispatcher_url))
+    logger.debug('Fetching new job from {0}'.format(dispatcher_url))
     response = requests.get(
         dispatcher_url,
         headers={
