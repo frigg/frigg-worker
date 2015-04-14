@@ -99,14 +99,7 @@ class Build(object):
                 self.run_task(task)
                 self.report_run()
 
-            if 'coverage' in self.settings:
-                coverage_file = os.path.join(self.working_directory,
-                                             self.settings['coverage']['path'])
-
-                self.coverage = parse_coverage(
-                    self.docker.read_file(coverage_file),
-                    self.settings['coverage']['parser']
-                )
+            self.parse_coverage()
 
         except Exception as e:
             self.error(task or '', e)
@@ -157,6 +150,20 @@ class Build(object):
         for task in self.settings['tasks']:
             self.tasks.append(task)
             self.results[task] = Result(task)
+
+    def parse_coverage(self):
+        if 'coverage' in self.settings:
+            try:
+                coverage_file = os.path.join(
+                    self.working_directory,
+                    self.settings['coverage']['path']
+                )
+                self.coverage = parse_coverage(
+                    self.docker.read_file(coverage_file),
+                    self.settings['coverage']['parser']
+                )
+            except Exception as e:
+                logger.exception(e)
 
     def delete_working_dir(self):
         if self.docker.directory_exist(self.working_directory):
