@@ -5,7 +5,7 @@ import mock
 from docker.manager import Docker
 from frigg.helpers import ProcessResult
 
-from frigg_worker.fetcher import evaluate_options
+from frigg_worker.cli import evaluate_options
 from frigg_worker.jobs import Build, Result
 
 DATA = {
@@ -194,6 +194,15 @@ class BuildTestCase(unittest.TestCase):
         self.build.start_services()
         mock_docker_run.assert_called_once_with('sudo service redis-server start')
 
+    @mock.patch('frigg_worker.jobs.logger.warning')
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_ONE_SERVICE)
+    def test_start_unknown_service(self, mock_logger_warning):
+        failed_result = ProcessResult()
+        failed_result.succeeded = False
+        with mock.patch('docker.manager.Docker.run', lambda *x: failed_result):
+            self.build.start_services()
+            mock_logger_warning.assert_called_with('Service "redis-server" did not start.')
+
     @mock.patch('docker.manager.Docker.run')
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_FOUR_SERVICES)
     def test_start_four_services_in_order(self, mock_docker_run):
@@ -201,9 +210,13 @@ class BuildTestCase(unittest.TestCase):
 
         mock_docker_run.assert_has_calls([
             mock.call('sudo service redis-server start'),
+            mock.call().succeeded.__bool__(),
             mock.call('sudo service postgresql start'),
+            mock.call().succeeded.__bool__(),
             mock.call('sudo service nginx start'),
+            mock.call().succeeded.__bool__(),
             mock.call('sudo service mongodb start'),
+            mock.call().succeeded.__bool__(),
         ])
 
 

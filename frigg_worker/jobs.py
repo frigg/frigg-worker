@@ -118,7 +118,7 @@ class Build(object):
             self.finished = True
             self.report_run()
 
-            logger.info("Run of build %s finished." % self.id)
+            logger.info('Run of build %s finished.' % self.id)
 
     def clone_repo(self, depth=1):
         command_options = {
@@ -130,23 +130,24 @@ class Build(object):
         }
 
         if self.pull_request_id is None:
-            clone = self.docker.run("git clone --depth=%(depth)s --branch=%(branch)s "
-                                    "%(url)s %(pwd)s" % command_options)
+            clone = self.docker.run('git clone --depth=%(depth)s --branch=%(branch)s '
+                                    '%(url)s %(pwd)s' % command_options)
         else:
             clone = self.docker.run(
-                ("git clone --depth=%(depth)s %(url)s %(pwd)s && cd %(pwd)s "
-                 "&& git fetch origin pull/%(pr_id)s/head:pull-%(pr_id)s "
-                 "&& git checkout pull-%(pr_id)s") % command_options
+                ('git clone --depth=%(depth)s %(url)s %(pwd)s && cd %(pwd)s '
+                 '&& git fetch origin pull/%(pr_id)s/head:pull-%(pr_id)s '
+                 '&& git checkout pull-%(pr_id)s') % command_options
             )
 
         if not clone.succeeded:
-            message = "Access denied to %s/%s" % (self.owner, self.name)
+            message = 'Access denied to %s/%s' % (self.owner, self.name)
             logger.error(message)
         return clone.succeeded
 
     def start_services(self):
         for service in self.settings['services']:
-            self.docker.run("sudo service {0} start".format(service))
+            if not self.docker.run('sudo service {0} start'.format(service)).succeeded:
+                logger.warning('Service "{}" did not start.'.format(service))
 
     def run_task(self, task_command):
         run_result = self.docker.run(task_command, self.working_directory)

@@ -1,1 +1,1 @@
-include setup.py README.md MANIFEST.in LICENSE frigg_worker/logging.conf
+include setup.py README.md MANIFEST.in LICENSE

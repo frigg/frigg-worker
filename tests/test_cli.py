@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-import sys
-from io import StringIO
 from unittest import TestCase
 
 from click.testing import CliRunner
 from mock import patch
 
-from frigg_worker.cli import load_logging_config, start
+from frigg_worker.cli import start
 
 
 class CLITestCase(TestCase):
@@ -17,13 +15,7 @@ class CLITestCase(TestCase):
         result = runner.invoke(start, [])
         self.assertTrue('Starting frigg worker' in result.output)
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once_with(
-            dispatcher_token=None,
-            dispatcher_url=None,
-            hq_token=None,
-            hq_url=None,
-            slack_url=None
-        )
+        mock_fetcher.assert_called_once()
 
     @patch('frigg_worker.cli.fetcher')
     def test_start_with_dispatcher_options(self, mock_fetcher):
@@ -31,13 +23,9 @@ class CLITestCase(TestCase):
         result = runner.invoke(start, ['--dispatcher-url=http://frigg.io', '--dispatcher-token=to'])
         self.assertTrue('Starting frigg worker' in result.output)
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once_with(
-            dispatcher_token='to',
-            dispatcher_url='http://frigg.io',
-            hq_token=None,
-            hq_url=None,
-            slack_url=None
-        )
+        mock_fetcher.assert_called_once()
+        self.assertEqual(mock_fetcher.call_args_list[0][1]['dispatcher_token'], 'to')
+        self.assertEqual(mock_fetcher.call_args_list[0][1]['dispatcher_url'], 'http://frigg.io')
 
     @patch('frigg_worker.cli.fetcher')
     def test_start_with_hq_options(self, mock_fetcher):
@@ -45,13 +33,18 @@ class CLITestCase(TestCase):
         result = runner.invoke(start, ['--hq-url=http://frigg.io', '--hq-token=to'])
         self.assertTrue('Starting frigg worker' in result.output)
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once_with(
-            dispatcher_token=None,
-            dispatcher_url=None,
-            hq_url='http://frigg.io',
-            hq_token='to',
-            slack_url=None
-        )
+        mock_fetcher.assert_called_once()
+        self.assertEqual(mock_fetcher.call_args_list[0][1]['hq_token'], 'to')
+        self.assertEqual(mock_fetcher.call_args_list[0][1]['hq_url'], 'http://frigg.io')
+
+    @patch('frigg_worker.cli.fetcher')
+    def test_start_with_loglevel(self, mock_fetcher):
+        runner = CliRunner()
+        result = runner.invoke(start, ['--hq-url=http://frigg.io', '--loglevel=ERROR'])
+        self.assertFalse('Starting frigg worker' in result.output)
+        self.assertEqual(result.exit_code, 0)
+        mock_fetcher.assert_called_once()
+        self.assertEqual(mock_fetcher.call_args_list[0][1]['loglevel'], 'ERROR')
 
     @patch('frigg_worker.cli.fetcher', side_effect=OSError('os-error'))
     def test_start_with_error(self, mock_fetcher):
@@ -61,22 +54,3 @@ class CLITestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertTrue('Starting frigg worker' in result.output)
         self.assertTrue('frigg_worker.cli - ERROR - os-error' in result.output)
-
-
-class LoggingConfigLoaderTestCase(TestCase):
-    def setUp(self):
-        self._stdout = sys.stdout
-        self.stdout = StringIO()
-        sys.stdout = self.stdout
-
-    def tearDown(self):
-        sys.stdout.close()
-        sys.stdout = self._stdout
-
-    def test_load_logging_config(self):
-        load_logging_config()
-
-    @patch('os.path.join', lambda *x: 'non-existing-path')
-    def test_load_logging_config_failure(self):
-        load_logging_config()
-        self.assertTrue('There is a problem with the logging config:\n' in sys.stdout.getvalue())
