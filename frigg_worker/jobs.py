@@ -176,7 +176,8 @@ class Build(object):
         try:
             return self.api.report_run(self.id, json.dumps(self, default=Build.serializer)) \
                 .status_code
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as e:
+            logger.exception(e)
             return 500
 
     @classmethod
