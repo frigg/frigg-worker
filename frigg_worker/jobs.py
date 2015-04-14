@@ -118,7 +118,7 @@ class Build(object):
             self.finished = True
             self.report_run()
 
-            logger.info("Run of build %s finished." % self.id)
+            logger.info('Run of build %s finished.' % self.id)
 
     def clone_repo(self, depth=1):
         command_options = {
