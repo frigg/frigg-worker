@@ -1,5 +1,4 @@
 # -*- coding: utf8 -*-
-import logging
 import logging.config
 
 import click
