@@ -1,28 +1,25 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from frigg.config import config
-
 logger = logging.getLogger(__name__)
 
 
-def load_logging_config():
+def load_logging_config(options):
     sentry = {}
     handlers = ['console']
     sentry_handler = []
-    if config('SENTRY_DSN'):
+    if options['sentry_dsn']:
         handlers = ['console', 'sentry']
         sentry_handler = ['sentry']
         sentry = {
             'level': 'ERROR',
             'class': 'raven.handlers.logging.SentryHandler',
-            'dsn': config('SENTRY_DSN')
+            'dsn': options['sentry_dsn']
         }
 
     return {
         'version': 1,
-        'disable_existing_loggers': True,
-
+        'disable_existing_loggers': False,
         'formatters': {
             'console': {
                 'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',

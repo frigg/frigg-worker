@@ -5,7 +5,7 @@ import mock
 from docker.manager import Docker
 from frigg.helpers import ProcessResult
 
-from frigg_worker.fetcher import evaluate_options
+from frigg_worker.cli import evaluate_options
 from frigg_worker.jobs import Build, Result
 
 DATA = {
