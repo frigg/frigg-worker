@@ -147,7 +147,7 @@ class Build(object):
     def start_services(self):
         for service in self.settings['services']:
             if not self.docker.run('sudo service {0} start'.format(service)).succeeded:
-                logger.warning('Service "{}" did not start.')
+                logger.warning('Service "{}" did not start.'.format(service))
 
     def run_task(self, task_command):
         run_result = self.docker.run(task_command, self.working_directory)
