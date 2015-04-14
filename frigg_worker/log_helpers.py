@@ -1,18 +1,25 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
 
 def load_logging_config(options):
-    sentry = {}
+    handler_config = {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    }
     handlers = ['console']
     sentry_handler = []
     frigg_level = options['loglevel']
-    if options['sentry_dsn']:
+    if options['sentry_dsn'] and 'TESTING' not in os.environ:
         handlers = ['console', 'sentry']
         sentry_handler = ['sentry']
-        sentry = {
+        handler_config['sentry'] = {
             'level': 'ERROR',
             'class': 'raven.handlers.logging.SentryHandler',
             'dsn': options['sentry_dsn']
@@ -20,22 +27,14 @@ def load_logging_config(options):
 
     return {
         'version': 1,
-        'disable_existing_loggers': False,
+        'disable_existing_loggers': True,
         'formatters': {
             'console': {
                 'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                 'datefmt': '%H:%M:%S',
             },
         },
-        'handlers': {
-            'console': {
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-                'formatter': 'console'
-            },
-            'sentry': sentry,
-        },
-
+        'handlers': handler_config,
         'loggers': {
             '': {
                 'handlers': sentry_handler,

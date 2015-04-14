@@ -27,10 +27,6 @@ class LoggingConfigLoaderTestCase(TestCase):
         self.assertIn('frigg_coverage', config_dict['loggers'])
         self.assertIn('frigg_worker', config_dict['loggers'])
 
-        config_dict = load_logging_config({'sentry_dsn': 'dsn', 'loglevel': 'DEBUG'})
-        self.assertIn('sentry', config_dict['handlers'])
-        self.assertEqual(config_dict['loggers']['frigg']['handlers'], ['console', 'sentry'])
-
     def test_load_config_custom_loglevel(self):
         config_dict = load_logging_config({'sentry_dsn': 'dsn', 'loglevel': 'CRITICAL'})
         self.assertEqual(config_dict['loggers']['frigg']['level'], 'CRITICAL')
