@@ -50,9 +50,9 @@ def evaluate_options(options):
     if options['dispatcher_token'] is None:
         options['dispatcher_token'] = config('DISPATCHER_TOKEN')
     if options['hq_token'] is None:
-        options['hq_token'] = config('HQ_URL')
+        options['hq_token'] = config('HQ_TOKEN')
     if options['hq_url'] is None:
-        options['hq_url'] = config('HQ_TOKEN')
+        options['hq_url'] = config('HQ_URL')
     if 'slack_icon' not in options:
         options['slack_icon'] = ':monkey_face:'
     if 'slack_channel' not in options:
