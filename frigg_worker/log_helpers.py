@@ -46,6 +46,11 @@ def load_logging_config(options):
                 'level': 'ERROR',
                 'propagate': True,
             },
+            'docker': {
+                'handlers': handlers,
+                'level': frigg_level,
+                'propagate': True,
+            },
             'frigg': {
                 'handlers': handlers,
                 'level': frigg_level,
