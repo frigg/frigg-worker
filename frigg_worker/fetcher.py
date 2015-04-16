@@ -25,7 +25,7 @@ def fetcher(**options):
 
 def start_build(task, options):
 
-    with Docker(image='frigg/frigg-test-base:latest') as docker:
+    with Docker(image='frigg/frigg-test-base:latest', combine_outputs=True) as docker:
         try:
             build = Build(task['id'], task, docker=docker, worker_options=options)
             logger.info('Starting {0}'.format(task))

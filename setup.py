@@ -24,7 +24,7 @@ setup(
         'click==4.0',
         'frigg-coverage==1.0.0',
         'frigg-common==0.2.0',
-        'docker-wrapper==0.2.2',
+        'docker-wrapper==0.3.0',
         'raven==5.2.0'
     ],
     entry_points={
