@@ -26,9 +26,12 @@ def fetcher(**options):
 def start_build(task, options):
 
     with Docker(image='frigg/frigg-test-base:latest') as docker:
-        build = Build(task['id'], task, docker=docker, worker_options=options)
-        logger.info('Starting {0}'.format(task))
-        build.run_tests()
+        try:
+            build = Build(task['id'], task, docker=docker, worker_options=options)
+            logger.info('Starting {0}'.format(task))
+            build.run_tests()
+        except Exception as e:
+            logger.exception(e)
 
 
 def fetch_task(dispatcher_url, dispatcher_token):
