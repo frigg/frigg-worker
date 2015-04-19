@@ -25,7 +25,7 @@ def fetcher(**options):
 
 def start_build(task, options):
     docker_options = {
-        'image': 'frigg/frigg-test-base:latest',
+        'image': options['docker_image'],
         'combine_outputs': True,
         'privilege': True
     }

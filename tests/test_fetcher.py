@@ -16,7 +16,9 @@ class FetcherTestCase(TestCase):
     def test_start_build(self, mock_runtests, mock_docker_stop, mock_docker_start):
         start_build({
             'id': 1,
-        }, {})
+        }, {'docker_image': 'frigg/frigg-test-base:latest',
+            'hq_token': 'test_token',
+            'hq_url': 'url'})
 
         self.assertTrue(mock_runtests.called)
         self.assertTrue(mock_docker_start.called)
