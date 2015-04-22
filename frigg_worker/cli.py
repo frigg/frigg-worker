@@ -17,6 +17,7 @@ logger = logging.getLogger('frigg_worker.cli')
 @click.option('--hq-token', default=None, help='Token for frigg-hq, overrides settings')
 @click.option('--slack-url', default=None, help='URL for incoming webhook in slack')
 @click.option('--loglevel', default='DEBUG', help='Set log level for frigg-packages')
+@click.option('--docker-image', default='frigg/frigg-test-base:latest', help='Set docker image')
 def start(**options):
     options = evaluate_options(options)
     logging.config.dictConfig(load_logging_config(options))
@@ -42,6 +43,8 @@ def evaluate_options(options):
         options['slack_icon'] = ':monkey_face:'
     if 'slack_channel' not in options:
         options['slack_channel'] = '#workforce'
+    if 'docker_image' not in options:
+        options['docker_image'] = 'frigg/frigg-test-base:latest'
 
     options['sentry_dsn'] = config('SENTRY_DSN')
     return options
