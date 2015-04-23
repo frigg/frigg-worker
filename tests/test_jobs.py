@@ -5,7 +5,6 @@ import mock
 from docker.manager import Docker
 from frigg.helpers import ProcessResult
 
-from frigg_worker.cli import evaluate_options
 from frigg_worker.jobs import Build, Result
 
 DATA = {
@@ -46,7 +45,7 @@ WORKER_OPTIONS = {
 class BuildTestCase(unittest.TestCase):
     def setUp(self):
         self.docker = Docker()
-        self.build = Build(1, DATA, self.docker, evaluate_options(WORKER_OPTIONS))
+        self.build = Build(1, DATA, self.docker, WORKER_OPTIONS)
 
     def test_init(self):
         self.assertEquals(self.build.id, 1)

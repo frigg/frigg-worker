@@ -5,7 +5,6 @@ import os
 from copy import deepcopy
 
 import requests
-from frigg.config import config, sentry
 from frigg.helpers import cached_property
 from frigg_coverage import parse_coverage
 
@@ -71,7 +70,7 @@ class Build(object):
 
     @property
     def working_directory(self):
-        return os.path.join(config('TMP_DIR'), str(self.id))
+        return os.path.join('builds', str(self.id))
 
     @property
     def succeeded(self):
@@ -102,8 +101,8 @@ class Build(object):
 
         except Exception as e:
             self.error(task or '', e)
-            sentry.captureException()
-            logger.error('Build nr. {build.id} failed\n{0}'.format(str(e), build=self))
+            logger.exception(e)
+            logger.info('Build nr. {build.id} failed\n{0}'.format(str(e), build=self))
         finally:
             self.delete_working_dir()
             self.finished = True
