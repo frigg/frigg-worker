@@ -32,6 +32,10 @@ class APIWrapper(object):
             build
         ))
         if response.status_code != 200:
+            logger.error('Report of build failed, response status-code: {0}, data:\n{1}'.format(
+                response.status_code,
+                build
+            ))
             with open('build-{0}-hq-response.html'.format(build_id), 'w') as f:
                 f.write(response.text)
         return response
