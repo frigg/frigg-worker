@@ -2,6 +2,7 @@
 import unittest
 
 import mock
+from raven import Client
 from docker.manager import Docker
 from frigg.helpers import ProcessResult
 
@@ -157,6 +158,7 @@ class BuildTestCase(unittest.TestCase):
 
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_serializer(self):
+        self.build.worker_options['sentry'] = Client()
         serialized = Build.serializer(self.build)
         self.assertEqual(serialized['id'], self.build.id)
         self.assertEqual(serialized['finished'], self.build.finished)

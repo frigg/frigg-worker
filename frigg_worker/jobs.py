@@ -2,7 +2,6 @@
 import json
 import logging
 import os
-from copy import deepcopy
 
 import requests
 from frigg.helpers import cached_property
@@ -187,12 +186,12 @@ class Build(object):
 
     @classmethod
     def serializer(cls, obj):
-        out = deepcopy(obj.__dict__)
-
+        out = {}
         if isinstance(obj, Build):
-            for key in ['worker_options', 'api', 'docker']:
-                if key in out:
-                    del out[key]
+            unwanted = ['worker_options', 'api', 'docker']
+            for key in obj.__dict__.keys():
+                if key not in unwanted:
+                    out[key] = obj.__dict__[key]
 
             out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
             try:
