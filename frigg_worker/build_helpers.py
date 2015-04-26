@@ -3,13 +3,13 @@ import logging
 from os.path import join
 
 import yaml
-from frigg.helpers import detect_test_runners
+from frigg_test_discovery import detect_test_tasks
 
 logger = logging.getLogger(__name__)
 
 
 def build_tasks(directory, docker):
-    return detect_test_runners(docker.list_files(directory))
+    return detect_test_tasks(docker.list_files(directory))
 
 
 def load_settings_file(path, docker):
@@ -40,3 +40,19 @@ def build_settings(directory, docker):
         raise RuntimeError('No tasks found')
 
     return settings
+
+
+class CachedProperty(object):
+    def __init__(self, func, name=None):
+        self.func = func
+        self.__doc__ = getattr(func, '__doc__')
+        self.name = name or func.__name__
+
+    def __get__(self, instance, type=None):
+        if instance is None:
+            return self
+        res = instance.__dict__[self.name] = self.func(instance)
+        return res
+
+
+cached_property = CachedProperty

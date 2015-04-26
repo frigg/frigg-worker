@@ -2,9 +2,9 @@
 import unittest
 
 import mock
-from raven import Client
+from docker.helpers import ProcessResult
 from docker.manager import Docker
-from frigg.helpers import ProcessResult
+from raven import Client
 
 from frigg_worker.jobs import Build, Result
 
@@ -174,8 +174,8 @@ class BuildTestCase(unittest.TestCase):
         serialized = Build.serializer(self.build)
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': True}])
 
-        result = ProcessResult(out='Success')
-        result.succeeded = True
+        result = ProcessResult('tox')
+        result.out = 'Success'
         result.return_code = 0
         self.build.results['tox'].update_result(result)
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
@@ -198,8 +198,8 @@ class BuildTestCase(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.logger.warning')
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_ONE_SERVICE)
     def test_start_unknown_service(self, mock_logger_warning):
-        failed_result = ProcessResult()
-        failed_result.succeeded = False
+        failed_result = ProcessResult('tox')
+        failed_result.return_code = 1
         with mock.patch('docker.manager.Docker.run', lambda *x: failed_result):
             self.build.start_services()
             mock_logger_warning.assert_called_with('Service "redis-server" did not start.')
@@ -223,8 +223,8 @@ class BuildTestCase(unittest.TestCase):
 
 class ResultTestCase(unittest.TestCase):
     def test_update_result_success(self):
-        result = ProcessResult(out='Success')
-        result.succeeded = True
+        result = ProcessResult('tox')
+        result.out = 'Success'
         result.return_code = 0
         success = Result('tox')
         success.update_result(result)
@@ -233,8 +233,8 @@ class ResultTestCase(unittest.TestCase):
         self.assertEquals(success.task, 'tox')
 
     def test_update_result_failure(self):
-        result = ProcessResult(out='Oh snap')
-        result.succeeded = False
+        result = ProcessResult('tox')
+        result.out = 'Oh snap'
         result.return_code = 1
         failure = Result('tox')
         failure.update_result(result)
