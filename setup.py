@@ -23,8 +23,9 @@ setup(
     install_requires=[
         'click==4.0',
         'frigg-coverage==1.0.0',
-        'frigg-common==0.2.0',
+        'frigg-test-discovery>0.0,<1.1',
         'docker-wrapper==0.5.0',
+        'pyyaml==3.11',
         'raven==5.2.0'
     ],
     entry_points={

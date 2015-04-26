@@ -4,10 +4,9 @@ import logging
 import os
 
 import requests
-from frigg.helpers import cached_property
 from frigg_coverage import parse_coverage
 
-from frigg_worker.build_helpers import build_settings
+from frigg_worker.build_helpers import build_settings, cached_property
 
 from . import api
 
