@@ -24,11 +24,15 @@ Usage
     Options:
       --dispatcher-url TEXT    URL to the dispatcher, overrides settings
       --dispatcher-token TEXT  Token for dispatcher, overrides settings
-      --hq-url TEXT            URl for frigg-hq, overrides settings
+      --hq-url TEXT            URL for frigg-hq, overrides settings
       --hq-token TEXT          Token for frigg-hq, overrides settings
       --slack-url TEXT         URL for incoming webhook in slack
+      --sentry-dsn TEXT        Sentry dsn needed to connect to the sentry API
       --loglevel TEXT          Set log level for frigg-packages
+      --docker-image TEXT      The docker image, could be either from the registry
+                               or a local tag.
       --help                   Show this message and exit.
+
 
 Running frigg-worker from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,6 +40,7 @@ Running frigg-worker from source
 ::
 
     python -m frigg_worker.cli
+
 
 --------------
 
