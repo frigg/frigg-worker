@@ -46,7 +46,11 @@ def fetch_task(dispatcher_url, dispatcher_token):
             'x-frigg-worker-token': dispatcher_token
         }
     )
-    return response.json()['job']
+
+    if response.status_code == 200:
+        return response.json()['job']
+    else:
+        time.sleep(20)
 
 
 def notify_of_upstart(options):
