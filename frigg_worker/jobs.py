@@ -91,6 +91,7 @@ class Build(object):
             self.start_services()
             self.finished = False
             self.create_pending_tasks()
+            self.report_run()
             for task in self.settings['tasks']:
                 self.run_task(task)
                 self.report_run()
