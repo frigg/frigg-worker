@@ -59,8 +59,9 @@ class Build(object):
         self.__dict__.update(obj)
         self.id = build_id
         self.results = {}
-        self.setup_tasks = []
         self.tasks = []
+        self.setup_tasks = []
+        self.setup_results = {}
         self.finished = False
         self.docker = docker
         self.worker_options = worker_options
@@ -95,7 +96,7 @@ class Build(object):
             self.report_run()
 
             for task in self.settings['setup_tasks']:
-                self.run_task(task)
+                self.run_task(task, self.setup_results)
                 self.report_run()
 
             for task in self.settings['tasks']:
@@ -140,9 +141,12 @@ class Build(object):
             if not self.docker.run('sudo service {0} start'.format(service)).succeeded:
                 logger.warning('Service "{0}" did not start.'.format(service))
 
-    def run_task(self, task_command):
+    def run_task(self, task_command, results=None):
+        if results is None:
+            results = self.results
+
         run_result = self.docker.run(task_command, self.working_directory)
-        self.results[task_command].update_result(run_result)
+        results[task_command].update_result(run_result)
 
     def create_pending_tasks(self):
         """
@@ -152,7 +156,7 @@ class Build(object):
         """
         for task in self.settings['setup_tasks']:
             self.tasks.append(task)
-            self.results[task] = Result(task)
+            self.setup_results[task] = Result(task)
 
         for task in self.settings['tasks']:
             self.tasks.append(task)
@@ -203,8 +207,11 @@ class Build(object):
                 if key not in unwanted:
                     out[key] = obj.__dict__[key]
 
-            out['setup_results'] = [Result.serialize(obj.results[key]) for key in obj.setup_tasks]
-            out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
+            out['setup_results'] = [Result.serialize(obj.setup_results[key])
+                                    for key in obj.setup_tasks]
+
+            out['results'] = [Result.serialize(obj.results[key])
+                              for key in obj.tasks]
 
             try:
                 out['settings'] = obj.settings
