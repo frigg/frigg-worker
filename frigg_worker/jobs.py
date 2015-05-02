@@ -96,7 +96,7 @@ class Build(object):
             self.report_run()
 
             for task in self.settings['setup_tasks']:
-                self.run_task(task, self.setup_results)
+                self.run_setup_task(task)
                 self.report_run()
 
             for task in self.settings['tasks']:
@@ -141,12 +141,13 @@ class Build(object):
             if not self.docker.run('sudo service {0} start'.format(service)).succeeded:
                 logger.warning('Service "{0}" did not start.'.format(service))
 
-    def run_task(self, task_command, results=None):
-        if results is None:
-            results = self.results
-
+    def run_task(self, task_command):
         run_result = self.docker.run(task_command, self.working_directory)
-        results[task_command].update_result(run_result)
+        self.results[task_command].update_result(run_result)
+
+    def run_setup_task(self, task_command):
+        run_result = self.docker.run(task_command, self.working_directory)
+        self.setup_results[task_command].update_result(run_result)
 
     def create_pending_tasks(self):
         """
