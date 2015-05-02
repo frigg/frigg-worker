@@ -60,6 +60,8 @@ class Build(object):
         self.id = build_id
         self.results = {}
         self.tasks = []
+        self.setup_tasks = []
+        self.setup_results = {}
         self.finished = False
         self.docker = docker
         self.worker_options = worker_options
@@ -92,6 +94,11 @@ class Build(object):
             self.finished = False
             self.create_pending_tasks()
             self.report_run()
+
+            for task in self.settings['setup_tasks']:
+                self.run_setup_task(task)
+                self.report_run()
+
             for task in self.settings['tasks']:
                 self.run_task(task)
                 self.report_run()
@@ -138,12 +145,20 @@ class Build(object):
         run_result = self.docker.run(task_command, self.working_directory)
         self.results[task_command].update_result(run_result)
 
+    def run_setup_task(self, task_command):
+        run_result = self.docker.run(task_command, self.working_directory)
+        self.setup_results[task_command].update_result(run_result)
+
     def create_pending_tasks(self):
         """
         Creates pending task results in a dict on self.result with task string as key. It will also
         create a list on self.tasks that is used to make sure the serialization of the results
         creates a correctly ordered list.
         """
+        for task in self.settings['setup_tasks']:
+            self.tasks.append(task)
+            self.setup_results[task] = Result(task)
+
         for task in self.settings['tasks']:
             self.tasks.append(task)
             self.results[task] = Result(task)
@@ -193,7 +208,12 @@ class Build(object):
                 if key not in unwanted:
                     out[key] = obj.__dict__[key]
 
-            out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
+            out['setup_results'] = [Result.serialize(obj.setup_results[key])
+                                    for key in obj.setup_tasks]
+
+            out['results'] = [Result.serialize(obj.results[key])
+                              for key in obj.tasks]
+
             try:
                 out['settings'] = obj.settings
             except RuntimeError:

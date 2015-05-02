@@ -18,18 +18,28 @@ DATA = {
 }
 
 BUILD_SETTINGS_WITH_NO_SERVICES = {
+    'setup_tasks': [],
     'tasks': ['tox'],
     'services': [],
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
 }
 
 BUILD_SETTINGS_ONE_SERVICE = {
+    'setup_tasks': [],
     'tasks': ['tox'],
     'services': ['redis-server'],
     'coverage': None,
 }
 
 BUILD_SETTINGS_FOUR_SERVICES = {
+    'setup_tasks': [],
+    'tasks': ['tox'],
+    'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
+    'coverage': None,
+}
+
+BUILD_SETTINGS_SERVICES_AND_SETUP = {
+    'setup_tasks': ['apt-get install nginx'],
     'tasks': ['tox'],
     'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
     'coverage': None,
@@ -172,6 +182,7 @@ class BuildTestCase(unittest.TestCase):
         self.build.tasks.append('tox')
         self.build.results['tox'] = Result('tox')
         serialized = Build.serializer(self.build)
+        self.assertEqual(serialized['setup_results'], [])
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': True}])
 
         result = ProcessResult('tox')
@@ -180,6 +191,38 @@ class BuildTestCase(unittest.TestCase):
         self.build.results['tox'].update_result(result)
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
                                                   'return_code': 0, 'succeeded': True}])
+
+        self.assertEqual(serialized['setup_results'], [])
+
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_SERVICES_AND_SETUP)
+    def test_serializer_with_setup_and_tasks(self):
+        self.build.worker_options['sentry'] = Client()
+
+        self.build.tasks.append('tox')
+        self.build.setup_tasks.append('apt-get install nginx')
+        self.build.results['tox'] = Result('tox')
+        self.build.setup_results['apt-get install nginx'] = Result('apt-get install nginx')
+        serialized = Build.serializer(self.build)
+        self.assertEqual(serialized['setup_results'], [{'task': 'apt-get install nginx',
+                                                        'pending': True}])
+        self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': True}])
+
+        result = ProcessResult('tox')
+        result.out = 'Success'
+        result.return_code = 0
+        self.build.results['tox'].update_result(result)
+
+        setup_result = ProcessResult('apt-get install nginx')
+        setup_result.out = 'Success'
+        setup_result.return_code = 0
+        self.build.setup_results['apt-get install nginx'].update_result(setup_result)
+
+        self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
+                                                  'return_code': 0, 'succeeded': True}])
+
+        self.assertEqual(serialized['setup_results'], [{'task': 'apt-get install nginx',
+                                                        'pending': False, 'log': 'Success',
+                                                        'return_code': 0, 'succeeded': True}])
 
     @mock.patch('docker.manager.Docker.start')
     @mock.patch('docker.manager.Docker.stop')
@@ -218,6 +261,28 @@ class BuildTestCase(unittest.TestCase):
             mock.call().succeeded.__bool__(),
             mock.call('sudo service mongodb start'),
             mock.call().succeeded.__bool__(),
+        ])
+
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.Build.delete_working_dir', lambda x: True)
+    @mock.patch('frigg_worker.jobs.Build.clone_repo', lambda x: True)
+    @mock.patch('frigg_worker.jobs.Build.parse_coverage', lambda x: True)
+    @mock.patch('frigg_worker.jobs.Build.report_run', lambda x: None)
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_SERVICES_AND_SETUP)
+    def test_build_setup_steps(self, mock_docker_run):
+        self.build.run_tests()
+
+        mock_docker_run.assert_has_calls([
+            mock.call('sudo service redis-server start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('sudo service postgresql start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('sudo service nginx start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('sudo service mongodb start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('apt-get install nginx', self.build.working_directory),
+            mock.call('tox', self.build.working_directory),
         ])
 
 
