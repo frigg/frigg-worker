@@ -59,6 +59,7 @@ class Build(object):
         self.__dict__.update(obj)
         self.id = build_id
         self.results = {}
+        self.setup_tasks = []
         self.tasks = []
         self.finished = False
         self.docker = docker
@@ -92,6 +93,11 @@ class Build(object):
             self.finished = False
             self.create_pending_tasks()
             self.report_run()
+
+            for task in self.settings['setup_tasks']:
+                self.run_task(task)
+                self.report_run()
+
             for task in self.settings['tasks']:
                 self.run_task(task)
                 self.report_run()
@@ -144,6 +150,10 @@ class Build(object):
         create a list on self.tasks that is used to make sure the serialization of the results
         creates a correctly ordered list.
         """
+        for task in self.settings['setup_tasks']:
+            self.tasks.append(task)
+            self.results[task] = Result(task)
+
         for task in self.settings['tasks']:
             self.tasks.append(task)
             self.results[task] = Result(task)
@@ -193,7 +203,9 @@ class Build(object):
                 if key not in unwanted:
                     out[key] = obj.__dict__[key]
 
+            out['setup_results'] = [Result.serialize(obj.results[key]) for key in obj.setup_tasks]
             out['results'] = [Result.serialize(obj.results[key]) for key in obj.tasks]
+
             try:
                 out['settings'] = obj.settings
             except RuntimeError:

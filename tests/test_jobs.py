@@ -18,18 +18,28 @@ DATA = {
 }
 
 BUILD_SETTINGS_WITH_NO_SERVICES = {
+    'setup_tasks': [],
     'tasks': ['tox'],
     'services': [],
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
 }
 
 BUILD_SETTINGS_ONE_SERVICE = {
+    'setup_tasks': [],
     'tasks': ['tox'],
     'services': ['redis-server'],
     'coverage': None,
 }
 
 BUILD_SETTINGS_FOUR_SERVICES = {
+    'setup_tasks': [],
+    'tasks': ['tox'],
+    'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
+    'coverage': None,
+}
+
+BUILD_SETTINGS_SERVICES_AND_SETUP = {
+    'setup_tasks': ['apt-get install nginx'],
     'tasks': ['tox'],
     'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
     'coverage': None,
@@ -218,6 +228,28 @@ class BuildTestCase(unittest.TestCase):
             mock.call().succeeded.__bool__(),
             mock.call('sudo service mongodb start'),
             mock.call().succeeded.__bool__(),
+        ])
+
+    @mock.patch('docker.manager.Docker.run')
+    @mock.patch('frigg_worker.jobs.Build.delete_working_dir', lambda x: True)
+    @mock.patch('frigg_worker.jobs.Build.clone_repo', lambda x: True)
+    @mock.patch('frigg_worker.jobs.Build.parse_coverage', lambda x: True)
+    @mock.patch('frigg_worker.jobs.Build.report_run', lambda x: None)
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_SERVICES_AND_SETUP)
+    def test_build_setup_steps(self, mock_docker_run):
+        self.build.run_tests()
+
+        mock_docker_run.assert_has_calls([
+            mock.call('sudo service redis-server start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('sudo service postgresql start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('sudo service nginx start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('sudo service mongodb start'),
+            mock.call().succeeded.__bool__(),
+            mock.call('apt-get install nginx', self.build.working_directory),
+            mock.call('tox', self.build.working_directory),
         ])
 
 

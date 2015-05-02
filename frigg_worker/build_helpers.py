@@ -27,6 +27,8 @@ def build_settings(directory, docker):
     path = get_path_of_settings_file(directory, docker)
 
     settings = {
+        'setup_tasks': [],
+        'tasks': [],
         'webhooks': [],
         'services': []
     }
