@@ -182,6 +182,7 @@ class BuildTestCase(unittest.TestCase):
         self.build.tasks.append('tox')
         self.build.results['tox'] = Result('tox')
         serialized = Build.serializer(self.build)
+        self.assertEqual(serialized['setup_results'], [])
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': True}])
 
         result = ProcessResult('tox')
@@ -190,6 +191,38 @@ class BuildTestCase(unittest.TestCase):
         self.build.results['tox'].update_result(result)
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
                                                   'return_code': 0, 'succeeded': True}])
+
+        self.assertEqual(serialized['setup_results'], [])
+
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_SERVICES_AND_SETUP)
+    def test_serializer_with_setup_and_tasks(self):
+        self.build.worker_options['sentry'] = Client()
+
+        self.build.tasks.append('tox')
+        self.build.setup_tasks.append('apt-get install nginx')
+        self.build.results['tox'] = Result('tox')
+        self.build.setup_results['apt-get install nginx'] = Result('apt-get install nginx')
+        serialized = Build.serializer(self.build)
+        self.assertEqual(serialized['setup_results'], [{'task': 'apt-get install nginx',
+                                                        'pending': True}])
+        self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': True}])
+
+        result = ProcessResult('tox')
+        result.out = 'Success'
+        result.return_code = 0
+        self.build.results['tox'].update_result(result)
+
+        setup_result = ProcessResult('apt-get install nginx')
+        setup_result.out = 'Success'
+        setup_result.return_code = 0
+        self.build.setup_results['apt-get install nginx'].update_result(setup_result)
+
+        self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
+                                                  'return_code': 0, 'succeeded': True}])
+
+        self.assertEqual(serialized['setup_results'], [{'task': 'apt-get install nginx',
+                                                        'pending': False, 'log': 'Success',
+                                                        'return_code': 0, 'succeeded': True}])
 
     @mock.patch('docker.manager.Docker.start')
     @mock.patch('docker.manager.Docker.stop')
