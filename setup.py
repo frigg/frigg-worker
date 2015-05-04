@@ -26,7 +26,7 @@ setup(
         'frigg-test-discovery>0.0,<1.1',
         'docker-wrapper==0.6.0',
         'pyyaml==3.11',
-        'raven==5.2.0'
+        'raven==5.3.1'
     ],
     entry_points={
         'console_scripts': ['frigg-worker = frigg_worker.cli:start']
