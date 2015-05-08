@@ -263,6 +263,14 @@ class BuildTestCase(unittest.TestCase):
             mock.call().succeeded.__bool__(),
         ])
 
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_SERVICES_AND_SETUP)
+    def test_create_pending_tasks_splitted_into_setup_tasks_and_tasks(self):
+        self.assertEqual([], self.build.tasks)
+        self.assertEqual([], self.build.setup_tasks)
+        self.build.create_pending_tasks()
+        self.assertEqual(["apt-get install nginx"], self.build.setup_tasks)
+        self.assertEqual(["tox"], self.build.tasks)
+
     @mock.patch('docker.manager.Docker.run')
     @mock.patch('frigg_worker.jobs.Build.delete_working_dir', lambda x: True)
     @mock.patch('frigg_worker.jobs.Build.clone_repo', lambda x: True)
