@@ -156,7 +156,7 @@ class Build(object):
         creates a correctly ordered list.
         """
         for task in self.settings['setup_tasks']:
-            self.tasks.append(task)
+            self.setup_tasks.append(task)
             self.setup_results[task] = Result(task)
 
         for task in self.settings['tasks']:
