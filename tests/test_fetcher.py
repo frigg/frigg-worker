@@ -8,11 +8,11 @@ from mock import patch
 from frigg_worker.fetcher import fetch_task, start_build
 
 
-class FetcherTestCase(TestCase):
+class FetcherTests(TestCase):
 
     @patch('docker.manager.Docker.start')
     @patch('docker.manager.Docker.stop')
-    @patch('frigg_worker.jobs.Build.run_tests')
+    @patch('frigg_worker.builds.Build.run_tests')
     def test_start_build(self, mock_runtests, mock_docker_stop, mock_docker_start):
         start_build({
             'id': 1,

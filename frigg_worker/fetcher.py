@@ -8,17 +8,28 @@ import time
 import requests
 from docker.manager import Docker
 
-from .jobs import Build
+from .builds import Build
+from .deployments import Deployment
 
 logger = logging.getLogger(__name__)
 
 
-def fetcher(**options):
+def fetch_builds(**options):
     notify_of_upstart(options)
     while options['dispatcher_url']:
         task = fetch_task(options['dispatcher_url'], options['dispatcher_token'])
         if task:
             start_build(task, options)
+
+        time.sleep(5.0 + random.randint(1, 100) / 100)
+
+
+def fetch_deployments(**options):
+    notify_of_upstart(options)
+    while options['dispatcher_url']:
+        task = fetch_task(options['dispatcher_url'], options['dispatcher_token'])
+        if task:
+            start_deployment(task, options)
 
         time.sleep(5.0 + random.randint(1, 100) / 100)
 
@@ -37,6 +48,20 @@ def start_build(task, options):
             build.run_tests()
         except Exception as e:
             logger.exception(e)
+
+
+def start_deployment(task, options):
+    print(task)
+    docker_options = {
+        'image': task['image'],
+        'combine_outputs': True,
+        'privilege': True,
+        'ports_mapping': ['8000:{port}'.format(**task)]
+    }
+    docker = Docker(**docker_options)
+    docker.start()
+    deployment = Deployment(task['id'], task, docker=docker, worker_options=options)
+    deployment.run_deploy()
 
 
 def fetch_task(dispatcher_url, dispatcher_token):

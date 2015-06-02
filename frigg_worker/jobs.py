@@ -4,7 +4,6 @@ import logging
 import os
 
 import requests
-from frigg_coverage import parse_coverage
 
 from frigg_worker.build_helpers import build_settings, cached_property
 
@@ -42,7 +41,9 @@ class Result(object):
         return obj.__dict__
 
 
-class Build(object):
+class Job(object):
+    MAIN_TASKS_KEY = 'tasks'
+
     id = ''
     results = None
     cloned = False
@@ -82,39 +83,6 @@ class Build(object):
     @cached_property
     def settings(self):
         return build_settings(self.working_directory, self.docker)
-
-    def run_tests(self):
-        task = None
-        self.delete_working_dir()
-        if not self.clone_repo():
-            return self.error('git clone', 'Access denied')
-
-        try:
-            self.start_services()
-            self.finished = False
-            self.create_pending_tasks()
-            self.report_run()
-
-            for task in self.settings['setup_tasks']:
-                self.run_setup_task(task)
-                self.report_run()
-
-            for task in self.settings['tasks']:
-                self.run_task(task)
-                self.report_run()
-
-            self.parse_coverage()
-
-        except Exception as e:
-            self.error(task or '', e)
-            logger.exception(e)
-            logger.info('Build nr. {build.id} failed\n{0}'.format(str(e), build=self))
-        finally:
-            self.delete_working_dir()
-            self.finished = True
-            self.report_run()
-
-            logger.info('Run of build {build.id} finished.'.format(build=self))
 
     def clone_repo(self, depth=1):
         if self.pull_request_id is None:
@@ -159,23 +127,9 @@ class Build(object):
             self.setup_tasks.append(task)
             self.setup_results[task] = Result(task)
 
-        for task in self.settings['tasks']:
+        for task in self.settings[self.MAIN_TASKS_KEY]:
             self.tasks.append(task)
             self.results[task] = Result(task)
-
-    def parse_coverage(self):
-        if 'coverage' in self.settings:
-            try:
-                coverage_file = os.path.join(
-                    self.working_directory,
-                    self.settings['coverage']['path']
-                )
-                self.coverage = parse_coverage(
-                    self.docker.read_file(coverage_file),
-                    self.settings['coverage']['parser']
-                )
-            except Exception as e:
-                logger.exception(e)
 
     def delete_working_dir(self):
         if self.docker.directory_exist(self.working_directory):
@@ -192,9 +146,13 @@ class Build(object):
             self.results[task] = result
 
     def report_run(self):
+
         try:
-            return self.api.report_run(self.id, json.dumps(self, default=Build.serializer)) \
-                .status_code
+            return self.api.report_run(
+                type(self).__name__,
+                self.id,
+                json.dumps(self, default=self.serializer)
+            ).status_code
         except requests.exceptions.ConnectionError as e:
             logger.exception(e)
             return 500
@@ -202,7 +160,7 @@ class Build(object):
     @classmethod
     def serializer(cls, obj):
         out = {}
-        if isinstance(obj, Build):
+        if isinstance(obj, Job):
             unwanted = ['worker_options', 'api', 'docker']
             for key in obj.__dict__.keys():
                 if key not in unwanted:
