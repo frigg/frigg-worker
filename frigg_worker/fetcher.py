@@ -27,7 +27,8 @@ def start_build(task, options):
     docker_options = {
         'image': options['docker_image'],
         'combine_outputs': True,
-        'privilege': True
+        'privilege': True,
+        'env_variables': {'CI': 'frigg'}
     }
     with Docker(**docker_options) as docker:
         try:
