@@ -1,7 +1,7 @@
 tasks:
- - tox
- - flake8
+ - tox -e flake8
  - isort -c -rc frigg_worker tests
+ - tox -e tests
  - coverage report && coverage xml
 
 coverage:
