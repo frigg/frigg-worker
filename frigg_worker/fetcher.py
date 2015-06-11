@@ -40,17 +40,20 @@ def start_build(task, options):
 
 def fetch_task(dispatcher_url, dispatcher_token):
     logger.debug('Fetching new job from {0}'.format(dispatcher_url))
-    response = requests.get(
-        dispatcher_url,
-        headers={
-            'x-frigg-worker-token': dispatcher_token
-        }
-    )
+    try:
+        response = requests.get(
+            dispatcher_url,
+            headers={
+                'x-frigg-worker-token': dispatcher_token
+            }
+        )
 
-    if response.status_code == 200:
-        return response.json()['job']
-    else:
-        time.sleep(20)
+        if response.status_code == 200:
+            return response.json()['job']
+    except requests.exceptions.ConnectionError as e:
+        logger.exception(e)
+
+    time.sleep(20)
 
 
 def notify_of_upstart(options):
