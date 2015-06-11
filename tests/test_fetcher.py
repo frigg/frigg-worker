@@ -36,3 +36,11 @@ class FetcherTestCase(TestCase):
 
         task = fetch_task('http://example.com', None)
         self.assertEqual(task['id'], 1)
+
+    @patch('time.sleep')
+    @patch('requests.packages.urllib3.response.HTTPResponse.from_httplib',
+           side_effect=TimeoutError())
+    def test_fetch_task_should(self, mock_send, mock_sleep):
+        fetch_task('http://example.com', None)
+        mock_sleep.assert_called_once_with(20)
+        mock_send.assert_called_once()
