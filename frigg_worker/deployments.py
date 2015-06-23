@@ -38,4 +38,3 @@ class Deployment(Job):
             self.report_run()
 
             logger.info('Run of deploy {build.id} finished.'.format(build=self))
-
