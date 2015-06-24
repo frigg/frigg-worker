@@ -3,13 +3,14 @@ import logging.config
 
 import click
 
-from .fetcher import fetcher
+from .fetcher import fetch_builds, fetch_deployments
 from .log_helpers import load_logging_config
 
 logger = logging.getLogger('frigg_worker.cli')
 
 
 @click.command()
+@click.argument('mode')
 @click.option('--dispatcher-url', default=None, help='URL to the dispatcher, overrides settings')
 @click.option('--dispatcher-token', default=None, help='Token for dispatcher, overrides settings')
 @click.option('--hq-url', default=None, help='URL for frigg-hq, overrides settings')
@@ -19,7 +20,7 @@ logger = logging.getLogger('frigg_worker.cli')
 @click.option('--loglevel', default='DEBUG', help='Set log level for frigg-packages')
 @click.option('--docker-image', default='frigg/frigg-test-base:latest',
               help='The docker image, could be either from the registry or a local tag.')
-def start(**kwargs):
+def start(mode, **kwargs):
     options = {
         'slack_icon': ':monkey_face:',
         'slack_channel': '#workforce'
@@ -35,7 +36,12 @@ def start(**kwargs):
 
     try:
         logger.info('Starting frigg worker')
-        fetcher(**options)
+        if mode == 'builder':
+            fetch_builds(**options)
+        elif mode == 'deployer':
+            fetch_deployments(**options)
+        else:
+            print('Unknown mode {0}'.format(mode))
     except Exception as e:
         logger.exception(e)
 

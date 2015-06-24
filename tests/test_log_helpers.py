@@ -6,7 +6,7 @@ from unittest import TestCase
 from frigg_worker.log_helpers import load_logging_config
 
 
-class LoggingConfigLoaderTestCase(TestCase):
+class LoggingConfigLoaderTests(TestCase):
     def setUp(self):
         self._stdout = sys.stdout
         self.stdout = StringIO()

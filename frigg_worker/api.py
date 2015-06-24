@@ -25,7 +25,7 @@ class APIWrapper(object):
     def post(self, url, data):
         return requests.post(url, data=data, headers=self.headers)
 
-    def report_run(self, build_id, build):
+    def report_run(self, endpoint, build_id, build):
         response = self.post(self.url, data=build)
         logger.info('Reported build to hq, hq response status-code: {0}, data:\n{1}'.format(
             response.status_code,
