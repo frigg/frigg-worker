@@ -51,7 +51,6 @@ def start_build(task, options):
 
 
 def start_deployment(task, options):
-    print(task)
     docker_options = {
         'image': task['image'],
         'combine_outputs': True,
