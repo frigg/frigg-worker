@@ -55,7 +55,7 @@ def start_deployment(task, options):
         'image': task['image'],
         'combine_outputs': True,
         'privilege': True,
-        'ports_mapping': ['8000:{port}'.format(**task)]
+        'ports_mapping': ['{port}:8000'.format(**task)]
     }
     docker = Docker(**docker_options)
     docker.start()
