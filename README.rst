@@ -19,7 +19,8 @@ Usage
 ::
 
     $ frigg_worker --help
-    Usage: frigg_worker [OPTIONS]
+    Usage: frigg_worker MODE [OPTIONS]
+
 
     Options:
       --dispatcher-url TEXT    URL to the dispatcher, overrides settings
@@ -32,6 +33,24 @@ Usage
       --docker-image TEXT      The docker image, could be either from the registry
                                or a local tag.
       --help                   Show this message and exit.
+
+
+The worker has two modes `builder` and `deployer` which defines whether the worker should
+build and run tests or deploy previews. The `--docker-image` option is ignored in deployer
+mode.
+
+Builder
+~~~~~~~
+Runs tasks within a given docker container before removing the docker container and reports
+to the build report API of HQ.
+
+Deployer
+~~~~~~~~
+Starts a docker container that will run for the amount of time specified by the task payload
+before running deploy tasks inside the container. The container exposes port 8000 to a port
+on the host system given by the task payload. The container-image is chosen from the task
+payload, thus, the worker trusts the task-queue to only contain tasks with allowed images.
+The status of the deployments is reported to the preview-deployment API of HQ.
 
 
 Running frigg-worker from source
