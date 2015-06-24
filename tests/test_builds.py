@@ -69,7 +69,7 @@ class BuildTests(unittest.TestCase):
         self.build.run_tests()
         mock_run_task.assert_called_once_with('tox')
         mock_clone_repo.assert_called_once()
-        mock_read_file.assert_called_once_with('builds/1/coverage.xml')
+        mock_read_file.assert_called_once_with('~/builds/1/coverage.xml')
         mock_parse_coverage.assert_called_once()
         self.assertTrue(self.build.succeeded)
         self.assertTrue(self.build.finished)
@@ -104,7 +104,7 @@ class BuildTests(unittest.TestCase):
     def test_delete_working_dir(self, mock_local_run, mock_directory_exist):
         self.build.delete_working_dir()
         mock_directory_exist.assert_called_once()
-        mock_local_run.assert_called_once_with('rm -rf builds/1')
+        mock_local_run.assert_called_once_with('rm -rf ~/builds/1')
 
     @mock.patch('docker.manager.Docker.run')
     @mock.patch('frigg_worker.builds.Build.delete_working_dir', lambda x: True)

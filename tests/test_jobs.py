@@ -101,13 +101,13 @@ class BuildTests(unittest.TestCase):
     def test_delete_working_dir(self, mock_local_run, mock_directory_exist):
         self.job.delete_working_dir()
         mock_directory_exist.assert_called_once()
-        mock_local_run.assert_called_once_with('rm -rf builds/1')
+        mock_local_run.assert_called_once_with('rm -rf ~/builds/1')
 
     @mock.patch('docker.manager.Docker.run')
     def test_run_task(self, mock_local_run):
         self.job.results['tox'] = Result('tox')
         self.job.run_task('tox')
-        mock_local_run.assert_called_once_with('tox', 'builds/1')
+        mock_local_run.assert_called_once_with('tox', '~/builds/1')
         self.assertEqual(len(self.job.results), 1)
         self.assertEqual(self.job.results['tox'].task, 'tox')
         self.assertEqual(self.job.results['tox'].pending, False)
@@ -116,7 +116,8 @@ class BuildTests(unittest.TestCase):
     def test_clone_repo_regular(self, mock_local_run):
         self.job.clone_repo(1)
         mock_local_run.assert_called_once_with(
-            'git clone --depth=1 --branch=master https://github.com/frigg/test-repo.git builds/1'
+            'git clone --depth=1 --branch=master https://github.com/frigg/test-repo.git ~/builds/1'
+            ' && cd ~/builds/1 && git reset --hard superbhash'
         )
 
     @mock.patch('docker.manager.Docker.start')
@@ -126,8 +127,9 @@ class BuildTests(unittest.TestCase):
         self.job.pull_request_id = 2
         self.job.clone_repo(1)
         mock_local_run.assert_called_once_with(
-            'git clone --depth=1 https://github.com/frigg/test-repo.git builds/1 && cd builds/1 && '
-            'git fetch origin pull/2/head:pull-2 && git checkout pull-2'
+            'git clone --depth=1 https://github.com/frigg/test-repo.git ~/builds/1 && cd ~/builds/1'
+            ' && git fetch origin pull/2/head:pull-2 && git checkout pull-2 && '
+            'cd ~/builds/1 && git reset --hard superbhash'
         )
 
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)

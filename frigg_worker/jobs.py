@@ -71,7 +71,7 @@ class Job(object):
 
     @property
     def working_directory(self):
-        return os.path.join('builds', str(self.id))
+        return os.path.join('~/builds', str(self.id))
 
     @property
     def succeeded(self):
@@ -84,7 +84,7 @@ class Job(object):
     def settings(self):
         return build_settings(self.working_directory, self.docker)
 
-    def clone_repo(self, depth=1):
+    def clone_repo(self, depth=20):
         if self.pull_request_id is None:
             command = (
                 'git clone --depth={depth} --branch={build.branch} {build.clone_url} '
@@ -97,6 +97,11 @@ class Job(object):
                 'git fetch origin pull/{build.pull_request_id}/head:pull-{build.pull_request_id} &&'
                 ' git checkout pull-{build.pull_request_id}'
             )
+
+        command += (
+            ' && cd {build.working_directory}'
+            ' && git reset --hard {build.sha}'
+        )
 
         clone = self.docker.run(command.format(build=self, depth=depth))
         if not clone.succeeded:
