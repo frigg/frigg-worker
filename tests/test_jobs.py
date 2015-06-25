@@ -50,6 +50,7 @@ WORKER_OPTIONS = {
     'dispatcher_token': 'tokened',
     'hq_url': 'http://example.com/hq',
     'hq_token': 'tokened',
+    'worker_host': 'albus.frigg.io'
 }
 
 
@@ -67,6 +68,7 @@ class BuildTests(unittest.TestCase):
         self.assertEquals(self.job.clone_url, DATA['clone_url'])
         self.assertEquals(self.job.owner, DATA['owner'])
         self.assertEquals(self.job.name, DATA['name'])
+        self.assertEquals(self.job.worker_host, 'albus.frigg.io')
 
     def test_error(self):
         self.job.error('tox', 'Command not found')
@@ -187,6 +189,7 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(serialized['setup_results'], [{'task': 'apt-get install nginx',
                                                         'pending': False, 'log': 'Success',
                                                         'return_code': 0, 'succeeded': True}])
+        self.assertIn('worker_host', serialized)
 
     @mock.patch('docker.manager.Docker.start')
     @mock.patch('docker.manager.Docker.stop')

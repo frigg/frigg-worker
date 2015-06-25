@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import logging.config
+import socket
 
 import click
 
@@ -33,6 +34,8 @@ def start(mode, **kwargs):
         options['sentry'] = Client(options['sentry_dsn'])
     except ImportError:
         options['sentry'] = None
+
+    options['worker_host'] = socket.gethostname()
 
     try:
         logger.info('Starting frigg worker')

@@ -63,6 +63,13 @@ class CLITests(TestCase):
         mock_logger_error.assert_called_once()
 
     @patch('frigg_worker.cli.logger.info')
+    @patch('frigg_worker.cli.fetch_builds')
+    def test_start_has_worker_host(self, mock_fetcher, mock_logger_info):
+        runner = CliRunner()
+        runner.invoke(start, ['builder'])
+        self.assertIn('worker_host', mock_fetcher.call_args[1])
+
+    @patch('frigg_worker.cli.logger.info')
     @patch('frigg_worker.cli.fetch_deployments')
     def test_start_deployer(self, mock_fetcher, mock_logger_info):
         runner = CliRunner()
