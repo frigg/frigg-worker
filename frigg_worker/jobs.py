@@ -55,6 +55,7 @@ class Job(object):
     pull_request_id = None
     coverage = None
     finished = False
+    worker_host = None
 
     def __init__(self, build_id, obj, docker, worker_options=None):
         self.__dict__.update(obj)
@@ -68,6 +69,8 @@ class Job(object):
         self.worker_options = worker_options
         if worker_options:
             self.api = api.APIWrapper(worker_options)
+            if 'worker_host' in worker_options:
+                self.worker_host = worker_options['worker_host']
 
     @property
     def working_directory(self):
