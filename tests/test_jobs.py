@@ -132,6 +132,14 @@ class BuildTests(unittest.TestCase):
             'cd ~/builds/1 && git reset --hard superbhash'
         )
 
+    @mock.patch('docker.manager.Docker.run')
+    def test_clone_repo_no_depth(self, mock_local_run):
+        self.job.clone_repo(0)
+        mock_local_run.assert_called_once_with(
+            'git clone  --branch=master https://github.com/frigg/test-repo.git ~/builds/1'
+            ' && cd ~/builds/1 && git reset --hard superbhash'
+        )
+
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_serializer(self):
         self.job.worker_options['sentry'] = Client()
