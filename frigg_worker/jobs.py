@@ -101,7 +101,7 @@ class Job(object):
         clone = self.docker.run(command.format(build=self, depth=depth))
         if not clone.succeeded:
             message = 'Access denied to {build.owner}/{build.name}'.format(build=self)
-            logger.error(message)
+            logger.error(message, extra={'stdout': clone.out, 'stderr': clone.err})
         return clone.succeeded
 
     def start_services(self):
