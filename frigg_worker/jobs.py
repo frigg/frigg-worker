@@ -71,7 +71,7 @@ class Job(object):
 
     @property
     def working_directory(self):
-        return os.path.join('builds', str(self.id))
+        return os.path.join('~/builds', str(self.id))
 
     @property
     def succeeded(self):
@@ -84,22 +84,34 @@ class Job(object):
     def settings(self):
         return build_settings(self.working_directory, self.docker)
 
-    def clone_repo(self, depth=1):
+    def clone_repo(self, depth=10):
+        depth_string = ''
+        if depth > 0:
+            depth_string = '--depth={0}'.format(depth)
         if self.pull_request_id is None:
             command = (
-                'git clone --depth={depth} --branch={build.branch} {build.clone_url} '
+                'git clone {depth} --branch={build.branch} {build.clone_url} '
                 '{build.working_directory}'
             )
         else:
             command = (
-                'git clone --depth={depth} {build.clone_url} {build.working_directory} && '
+                'git clone {depth} {build.clone_url} {build.working_directory} && '
                 'cd {build.working_directory} && '
                 'git fetch origin pull/{build.pull_request_id}/head:pull-{build.pull_request_id} &&'
                 ' git checkout pull-{build.pull_request_id}'
             )
 
-        clone = self.docker.run(command.format(build=self, depth=depth))
+        command += (
+            ' && cd {build.working_directory}'
+            ' && git reset --hard {build.sha}'
+        )
+
+        clone = self.docker.run(command.format(build=self, depth=depth_string))
         if not clone.succeeded:
+            if 'Could not parse object \'{0}\''.format(self.sha) in clone.out:
+                logger.warning('Could not checkout commit', extra={'build': self.serializer(self)})
+                self.delete_working_dir()
+                return self.clone_repo(depth=0)
             message = 'Access denied to {build.owner}/{build.name}'.format(build=self)
             logger.error(message, extra={'stdout': clone.out, 'stderr': clone.err})
         return clone.succeeded
