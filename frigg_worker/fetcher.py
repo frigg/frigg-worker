@@ -53,6 +53,7 @@ def start_build(task, options):
 def start_deployment(task, options):
     docker_options = {
         'image': task['image'],
+        'timeout': task['ttl'],
         'combine_outputs': True,
         'privilege': True,
         'ports_mapping': ['{port}:8000'.format(**task)]
