@@ -19,7 +19,7 @@ BUILD_SETTINGS_WITH_NO_SERVICES = {
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': [],
-    'deploy_tasks': ['pip install -r requirements.txt', 'gunicorn'],
+    'preview': {'tasks': ['pip install -r requirements.txt', 'gunicorn']},
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
 }
 
@@ -78,3 +78,10 @@ class DeploymentTests(unittest.TestCase):
     def test_report_run(self, mock_report_run):
         self.deployment.report_run()
         mock_report_run.assert_called_once_with('Deployment', 1, '{}')
+
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
+    def test_create_pending_tasks_splitted_into_setup_tasks_and_tasks(self):
+        self.assertEqual([], self.deployment.tasks)
+        self.assertEqual([], self.deployment.setup_tasks)
+        self.deployment.create_pending_tasks()
+        self.assertEqual(["pip install -r requirements.txt", "gunicorn"], self.deployment.tasks)

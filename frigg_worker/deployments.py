@@ -1,6 +1,6 @@
 import logging
 
-from .jobs import Job
+from .jobs import Job, Result
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class Deployment(Job):
                 self.run_setup_task(task)
                 self.report_run()
 
-            for task in self.settings['deploy_tasks']:
+            for task in self.settings['preview']['tasks']:
                 self.run_task(task)
                 self.report_run()
 
@@ -38,3 +38,17 @@ class Deployment(Job):
             self.report_run()
 
             logger.info('Run of deploy {build.id} finished.'.format(build=self))
+
+    def create_pending_tasks(self):
+        """
+        Creates pending task results in a dict on self.result with task string as key. It will also
+        create a list on self.tasks that is used to make sure the serialization of the results
+        creates a correctly ordered list.
+        """
+        for task in self.settings['setup_tasks']:
+            self.setup_tasks.append(task)
+            self.setup_results[task] = Result(task)
+
+        for task in self.settings['preview']['tasks']:
+            self.tasks.append(task)
+            self.results[task] = Result(task)
