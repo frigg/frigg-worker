@@ -45,6 +45,14 @@ BUILD_SETTINGS_SERVICES_AND_SETUP = {
     'coverage': None,
 }
 
+BUILD_SETTINGS_PREVIEW = {
+    'setup_tasks': [],
+    'tasks': [],
+    'services': [],
+    'coverage': None,
+    'preview': {'image': 'frigg/frigg-test-base', 'tasks': ['gunicorn']}
+}
+
 WORKER_OPTIONS = {
     'dispatcher_url': 'http://example.com/dispatch',
     'dispatcher_token': 'tokened',
@@ -200,6 +208,12 @@ class BuildTests(unittest.TestCase):
                                                         'pending': False, 'log': 'Success',
                                                         'return_code': 0, 'succeeded': True}])
         self.assertIn('worker_host', serialized)
+
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_PREVIEW)
+    def test_serializer_preview_settings(self):
+        serialized = Job.serializer(self.job)
+        self.assertEqual(serialized['settings']['preview']['image'], 'frigg/frigg-test-base')
+        self.assertEqual(serialized['settings']['preview']['tasks'], ['gunicorn'])
 
     @mock.patch('docker.manager.Docker.start')
     @mock.patch('docker.manager.Docker.stop')
