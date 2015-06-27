@@ -60,8 +60,12 @@ def start_deployment(task, options):
     }
     docker = Docker(**docker_options)
     docker.start()
-    deployment = Deployment(task['id'], task, docker=docker, worker_options=options)
-    deployment.run_deploy()
+    try:
+        deployment = Deployment(task['id'], task, docker=docker, worker_options=options)
+        deployment.run_deploy()
+    except Exception as e:
+        docker.stop()
+        raise e
 
 
 def fetch_task(dispatcher_url, dispatcher_token):
