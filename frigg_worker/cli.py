@@ -37,6 +37,10 @@ def start(mode, **kwargs):
 
     options['worker_host'] = socket.gethostname()
 
+    _start(mode, **options)
+
+
+def _start(mode, **options):
     try:
         logger.info('Starting frigg worker')
         if mode == 'builder':
@@ -47,6 +51,7 @@ def start(mode, **kwargs):
             print('Unknown mode {0}'.format(mode))
     except Exception as e:
         logger.exception(e)
+        _start(mode, **options)
 
 
 if __name__ == '__main__':
