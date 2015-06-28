@@ -114,7 +114,9 @@ class Job(object):
             if 'Could not parse object \'{0}\''.format(self.sha) in clone.out:
                 logger.warning('Could not checkout commit', extra={'build': self.serializer(self)})
                 self.delete_working_dir()
-                return self.clone_repo(depth=0)
+                if depth > 0:
+                    return self.clone_repo(depth=0)
+                return False
             message = 'Access denied to {build.owner}/{build.name}'.format(build=self)
             logger.error(message, extra={'stdout': clone.out, 'stderr': clone.err})
         return clone.succeeded
