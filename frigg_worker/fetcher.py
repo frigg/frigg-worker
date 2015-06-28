@@ -39,7 +39,8 @@ def start_build(task, options):
         'image': options['docker_image'],
         'combine_outputs': True,
         'privilege': True,
-        'env_variables': {'CI': 'frigg'}
+        'env_variables': {'CI': 'frigg'},
+        'name_prefix': 'build'
     }
     with Docker(**docker_options) as docker:
         try:
@@ -56,7 +57,8 @@ def start_deployment(task, options):
         'timeout': task['ttl'],
         'combine_outputs': True,
         'privilege': True,
-        'ports_mapping': ['{port}:8000'.format(**task)]
+        'ports_mapping': ['{port}:8000'.format(**task)],
+        'name_prefix': 'preview'
     }
     docker = Docker(**docker_options)
     docker.start()
