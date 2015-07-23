@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
+from unittest.mock import patch
 
 from click.testing import CliRunner
-from mock import patch
 
 from frigg_worker.cli import start
 

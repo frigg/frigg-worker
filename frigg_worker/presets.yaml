@@ -1,0 +1,24 @@
+scripts:
+ tasks:
+  - ./scripts/install
+ daemon_task: PORT=8000 ./scripts/server
+
+django-py2:
+ tasks:
+  - pip install -U gunicorn -r requirements.txt
+  - python manage.py migrate
+  - python manage.py collectstatic --noinput
+ daemon_task: nohup python manage.py runserver 0.0.0.0:8000 &
+
+django-py3:
+ tasks:
+  - pip3 install -U gunicorn -r requirements.txt
+  - python3 manage.py migrate
+  - python3 manage.py collectstatic --noinput
+ daemon_task: nohup python3 manage.py runserver 0.0.0.0:8000 &
+
+express:
+ tasks:
+  - npm install
+  - npm install -g forever
+ daemon_task: PORT=8000 forever start index.js

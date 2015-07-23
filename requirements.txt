@@ -12,5 +12,4 @@ pyyaml==3.11
 # testing tools
 pytest
 coverage
-mock
 responses

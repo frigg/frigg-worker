@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 import unittest
+from unittest import mock
 
-import mock
 from docker.manager import Docker
 
 from frigg_worker.builds import Build

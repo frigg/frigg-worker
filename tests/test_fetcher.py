@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 from unittest import TestCase
+from unittest.mock import patch
 
 import responses
-from mock import patch
 
 from frigg_worker.fetcher import fetch_task, start_build
 
