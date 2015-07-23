@@ -1,4 +1,5 @@
 import logging
+import yaml
 
 from .jobs import Job, Result
 
@@ -7,6 +8,8 @@ logger = logging.getLogger(__name__)
 
 class Deployment(Job):
 
+    preset = None
+
     MAIN_TASKS_KEY = 'deploy_tasks'
 
     def run_deploy(self):
@@ -14,6 +17,8 @@ class Deployment(Job):
         self.delete_working_dir()
         if not self.clone_repo():
             return self.error('git clone', 'Access denied')
+
+        self.load_preset()
 
         try:
             self.start_services()
@@ -25,8 +30,17 @@ class Deployment(Job):
                 self.run_setup_task(task)
                 self.report_run()
 
+            if self.preset:
+                for task in self.preset['tasks']:
+                    self.run_task(task)
+                    self.report_run()
+
             for task in self.settings['preview']['tasks']:
                 self.run_task(task)
+                self.report_run()
+
+            if self.preset:
+                self.run_task(self.preset['daemon_task'])
                 self.report_run()
 
         except Exception as e:
@@ -49,6 +63,27 @@ class Deployment(Job):
             self.setup_tasks.append(task)
             self.setup_results[task] = Result(task)
 
+        if self.preset:
+            for task in self.preset['tasks']:
+                self.tasks.append(task)
+                self.results[task] = Result(task)
+
         for task in self.settings['preview']['tasks']:
             self.tasks.append(task)
             self.results[task] = Result(task)
+
+        if self.preset:
+            self.tasks.append(self.preset['daemon_task'])
+            self.results[self.preset['daemon_task']] = Result(self.preset['daemon_task'])
+
+    def load_preset(self):
+        """
+        Loads preset if it is specified in the .frigg.yml
+        """
+        if 'preset' in self.settings['preview']:
+            with open('frigg_worker/presets.yaml') as f:
+                presets = yaml.load(f.read())
+
+            if self.settings['preview']['preset'] in presets:
+                self.preset = presets[self.settings['preview']['preset']]
+            return self.preset

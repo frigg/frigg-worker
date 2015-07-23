@@ -23,6 +23,14 @@ BUILD_SETTINGS_WITH_NO_SERVICES = {
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
 }
 
+BUILD_SETTINGS_WITH_PRESET = {
+    'setup_tasks': [],
+    'tasks': ['tox'],
+    'services': [],
+    'preview': {'tasks': ['load_data'], 'preset': 'django-py3'},
+    'coverage': {'path': 'coverage.xml', 'parser': 'python'}
+}
+
 WORKER_OPTIONS = {
     'dispatcher_url': 'http://example.com/dispatch',
     'dispatcher_token': 'tokened',
@@ -72,6 +80,15 @@ class DeploymentTests(unittest.TestCase):
         self.assertFalse(mock_run_task.called)
         self.assertFalse(self.deployment.succeeded)
 
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_PRESET)
+    @mock.patch('frigg_worker.deployments.Deployment.clone_repo', lambda x: True)
+    @mock.patch('frigg_worker.deployments.Deployment.report_run', lambda *x: None)
+    @mock.patch('frigg_worker.deployments.Deployment.load_preset')
+    @mock.patch('frigg_worker.deployments.Deployment.run_task')
+    def test_run_deploy(self, mock_run_task, mock_load_preset):
+        self.deployment.run_deploy()
+        self.assertTrue(mock_load_preset.called)
+
     @mock.patch('frigg_worker.api.APIWrapper.report_run')
     @mock.patch('frigg_worker.deployments.Deployment.serializer', lambda *x: {})
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {})
@@ -84,4 +101,20 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual([], self.deployment.tasks)
         self.assertEqual([], self.deployment.setup_tasks)
         self.deployment.create_pending_tasks()
-        self.assertEqual(["pip install -r requirements.txt", "gunicorn"], self.deployment.tasks)
+        self.assertEqual(['pip install -r requirements.txt', 'gunicorn'], self.deployment.tasks)
+
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_PRESET)
+    def test_load_preset(self):
+        self.deployment.load_preset()
+        self.assertIn('daemon_task', self.deployment.preset)
+        self.assertIn('tasks', self.deployment.preset)
+        self.assertEqual(
+            self.deployment.preset['daemon_task'],
+            'nohup python3 manage.py runserver 0.0.0.0:8000 &'
+        )
+        self.assertEqual(
+            self.deployment.preset['tasks'],
+            ['pip3 install -U gunicorn -r requirements.txt',
+             'python3 manage.py migrate',
+             'python3 manage.py collectstatic --noinput']
+        )
