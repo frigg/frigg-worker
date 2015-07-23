@@ -21,12 +21,12 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     install_requires=[
-        'click==4.0',
+        'click==4.1',
         'frigg-coverage==1.1.0',
         'frigg-test-discovery>0.0,<1.1',
         'docker-wrapper==0.7.0',
         'pyyaml==3.11',
-        'raven==5.4.1'
+        'raven==5.5.0'
     ],
     entry_points={
         'console_scripts': ['frigg-worker = frigg_worker.cli:start']
