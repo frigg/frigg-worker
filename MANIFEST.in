@@ -1,1 +1,1 @@
-include setup.py README.md MANIFEST.in LICENSE
+include setup.py README.md MANIFEST.in LICENSE frigg_worker/presets.yaml
