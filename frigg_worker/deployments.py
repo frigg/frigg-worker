@@ -1,4 +1,6 @@
 import logging
+import os
+
 import yaml
 
 from .jobs import Job, Result
@@ -81,7 +83,7 @@ class Deployment(Job):
         Loads preset if it is specified in the .frigg.yml
         """
         if 'preset' in self.settings['preview']:
-            with open('frigg_worker/presets.yaml') as f:
+            with open(os.path.join(os.path.dirname(__file__), 'presets.yaml')) as f:
                 presets = yaml.load(f.read())
 
             if self.settings['preview']['preset'] in presets:

@@ -85,7 +85,7 @@ class DeploymentTests(unittest.TestCase):
     @mock.patch('frigg_worker.deployments.Deployment.report_run', lambda *x: None)
     @mock.patch('frigg_worker.deployments.Deployment.load_preset')
     @mock.patch('frigg_worker.deployments.Deployment.run_task')
-    def test_run_deploy(self, mock_run_task, mock_load_preset):
+    def test_run_deploy_should_load_preset(self, mock_run_task, mock_load_preset):
         self.deployment.run_deploy()
         self.assertTrue(mock_load_preset.called)
 
