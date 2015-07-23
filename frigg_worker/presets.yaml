@@ -8,14 +8,14 @@ django-py2:
   - pip install -U gunicorn -r requirements.txt
   - python manage.py migrate
   - python manage.py collectstatic --noinput
- daemon_task: gunicorn -D -b 0.0.0.0:8000 frigg.wsgi
+ daemon_task: nohup python manage.py runserver 0.0.0.0:8000 &
 
 django-py3:
  tasks:
   - pip3 install -U gunicorn -r requirements.txt
   - python3 manage.py migrate
   - python3 manage.py collectstatic --noinput
- daemon_task: gunicorn -D -b 0.0.0.0:8000 frigg.wsgi
+ daemon_task: nohup python3 manage.py runserver 0.0.0.0:8000 &
 
 express:
  tasks:
