@@ -1,4 +1,6 @@
 # -*- encoding: utf8 -*-
+import re
+import sys
 import codecs
 from os import path
 from setuptools import setup, find_packages
@@ -8,9 +10,22 @@ def read(*parts):
     file_path = path.join(path.dirname(__file__), *parts)
     return codecs.open(file_path, encoding='utf-8').read()
 
+try:
+    from semantic_release import setup_hook
+    setup_hook(sys.argv)
+except ImportError:
+    pass
+
+with open('frigg_worker/__init__.py', 'r') as fd:
+    version = re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+        fd.read(),
+        re.MULTILINE
+    ).group(1)
+
 setup(
     name='frigg-worker',
-    version='2.2.0',
+    version=version,
     description='A worker application that listens to the frigg broker '
                 'an pick up builds and build them.',
     long_description=read('README.rst'),
