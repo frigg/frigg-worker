@@ -37,9 +37,9 @@ setup(
     include_package_data=True,
     install_requires=[
         'click==4.1',
-        'frigg-coverage==1.1.0',
-        'frigg-test-discovery>0.0,<1.1',
-        'docker-wrapper==0.7.0',
+        'frigg-coverage>=1.0.0,<2.0.0',
+        'frigg-test-discovery>0.0.0,<1.0.0',
+        'docker-wrapper>=0.7.0,<0.8.0',
         'pyyaml==3.11',
         'raven==5.5.0'
     ],
