@@ -11,5 +11,6 @@ pyyaml==3.11
 
 # testing tools
 pytest
+pytest-xdist
 coverage
 responses
