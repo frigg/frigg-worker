@@ -39,7 +39,7 @@ def start_build(task, options):
         'image': options['docker_image'],
         'combine_outputs': True,
         'privilege': True,
-        'env_variables': {'CI': 'frigg'},
+        'env_variables': {'CI': 'frigg', 'GH_TOKEN': task['gh_token']},
         'name_prefix': 'build'
     }
     with Docker(**docker_options) as docker:
@@ -58,6 +58,7 @@ def start_deployment(task, options):
         'combine_outputs': True,
         'privilege': True,
         'ports_mapping': ['{port}:8000'.format(**task)],
+        'env_variables': {'CI': 'frigg', 'GH_TOKEN': task['gh_token']},
         'name_prefix': 'preview'
     }
     docker = Docker(**docker_options)
