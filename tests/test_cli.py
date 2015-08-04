@@ -15,7 +15,7 @@ class CLITests(TestCase):
         runner = CliRunner()
         result = runner.invoke(start, ['builder'])
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once()
+        self.assertTrue(mock_fetcher.called)
         mock_logger_info.assert_called_once_with('Starting frigg worker')
 
     @patch('frigg_worker.cli.logger.info')
@@ -25,7 +25,7 @@ class CLITests(TestCase):
         result = runner.invoke(start, ['builder', '--dispatcher-url=http://frigg.io',
                                        '--dispatcher-token=to'])
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once()
+        self.assertTrue(mock_fetcher.called)
         mock_logger_info.assert_called_once_with('Starting frigg worker')
         self.assertEqual(mock_fetcher.call_args_list[0][1]['dispatcher_token'], 'to')
         self.assertEqual(mock_fetcher.call_args_list[0][1]['dispatcher_url'], 'http://frigg.io')
@@ -37,7 +37,7 @@ class CLITests(TestCase):
         result = runner.invoke(start, ['builder', '--hq-url=http://frigg.io', '--hq-token=to'])
         self.assertEqual(result.exit_code, 0)
         mock_logger_info.assert_called_once_with('Starting frigg worker')
-        mock_fetcher.assert_called_once()
+        self.assertTrue(mock_fetcher.called)
         self.assertEqual(mock_fetcher.call_args_list[0][1]['hq_token'], 'to')
         self.assertEqual(mock_fetcher.call_args_list[0][1]['hq_url'], 'http://frigg.io')
 
@@ -47,7 +47,7 @@ class CLITests(TestCase):
         runner = CliRunner()
         result = runner.invoke(start, ['builder', '--loglevel=ERROR'])
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once()
+        self.assertTrue(mock_fetcher.called)
         mock_logger_info.assert_called_once_with('Starting frigg worker')
         self.assertEqual(mock_fetcher.call_args_list[0][1]['loglevel'], 'ERROR')
 
@@ -64,5 +64,5 @@ class CLITests(TestCase):
         runner = CliRunner()
         result = runner.invoke(start, ['deployer'])
         self.assertEqual(result.exit_code, 0)
-        mock_fetcher.assert_called_once()
+        self.assertTrue(mock_fetcher.called)
         mock_logger_info.assert_called_once_with('Starting frigg worker')

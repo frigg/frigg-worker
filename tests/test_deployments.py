@@ -56,7 +56,7 @@ class DeploymentTests(unittest.TestCase):
             mock.call('pip install -r requirements.txt'),
             mock.call('gunicorn')
         ])
-        mock_clone_repo.assert_called_once()
+        self.assertTrue(mock_clone_repo.called)
         self.assertTrue(self.deployment.succeeded)
         self.assertTrue(self.deployment.finished)
 
@@ -66,7 +66,7 @@ class DeploymentTests(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_run_deploy_fail_task(self, mock_run_task, mock_clone_repo):
         self.deployment.run_deploy()
-        mock_clone_repo.assert_called_once()
+        self.assertTrue(mock_clone_repo.called)
         mock_run_task.assert_has_calls([
             mock.call('pip install -r requirements.txt'),
         ])
