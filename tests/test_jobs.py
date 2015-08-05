@@ -106,6 +106,14 @@ class BuildTests(unittest.TestCase):
         self.job.report_run()
         mock_report_run.assert_called_once_with('Job', 1, '{}')
 
+    @mock.patch('frigg_worker.api.APIWrapper.report_run')
+    @mock.patch('frigg_worker.jobs.Job.gh_token', 'a-gh-token')
+    @mock.patch('frigg_worker.jobs.Job.serializer', lambda *x: {'results': 'a-gh-token'})
+    @mock.patch('frigg_worker.jobs.build_settings', lambda *x: {})
+    def test_report_run_should_remove_gh_token_from_payload(self, mock_report_run):
+        self.job.report_run()
+        mock_report_run.assert_called_once_with('Job', 1, '{"results": ""}')
+
     @mock.patch('docker.manager.Docker.directory_exist')
     @mock.patch('docker.manager.Docker.run')
     def test_delete_working_dir(self, mock_local_run, mock_directory_exist):

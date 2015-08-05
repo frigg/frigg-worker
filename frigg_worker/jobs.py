@@ -5,9 +5,8 @@ import os
 
 import requests
 
-from frigg_worker.build_helpers import build_settings, cached_property
-
 from . import api
+from .build_helpers import build_settings, cached_property
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +55,7 @@ class Job(object):
     coverage = None
     finished = False
     worker_host = None
+    gh_token = ''
 
     def __init__(self, build_id, obj, docker, worker_options=None):
         self.__dict__.update(obj)
@@ -165,10 +165,12 @@ class Job(object):
     def report_run(self):
 
         try:
+            data = json.dumps(self, default=self.serializer)
+            data = data.replace(self.gh_token, '')
             return self.api.report_run(
                 type(self).__name__,
                 self.id,
-                json.dumps(self, default=self.serializer)
+                data
             ).status_code
         except requests.exceptions.ConnectionError as e:
             logger.exception(e)
