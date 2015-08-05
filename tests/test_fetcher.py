@@ -73,4 +73,4 @@ class FetcherTests(TestCase):
     def test_fetch_task_should(self, mock_send, mock_sleep):
         fetch_task('http://example.com', None)
         mock_sleep.assert_called_once_with(20)
-        mock_send.assert_called_once()
+        self.assertTrue(mock_send.called)

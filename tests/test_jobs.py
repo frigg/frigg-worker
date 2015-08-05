@@ -118,7 +118,7 @@ class BuildTests(unittest.TestCase):
     @mock.patch('docker.manager.Docker.run')
     def test_delete_working_dir(self, mock_local_run, mock_directory_exist):
         self.job.delete_working_dir()
-        mock_directory_exist.assert_called_once()
+        self.assertTrue(mock_directory_exist.called)
         mock_local_run.assert_called_once_with('rm -rf ~/builds/1')
 
     @mock.patch('docker.manager.Docker.run')

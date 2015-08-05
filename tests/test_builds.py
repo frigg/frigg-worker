@@ -68,9 +68,9 @@ class BuildTests(unittest.TestCase):
                        mock_parse_coverage, mock_docker_stop, mock_docker_start):
         self.build.run_tests()
         mock_run_task.assert_called_once_with('tox')
-        mock_clone_repo.assert_called_once()
+        self.assertTrue(mock_clone_repo.called)
         mock_read_file.assert_called_once_with('~/builds/1/coverage.xml')
-        mock_parse_coverage.assert_called_once()
+        self.assertTrue(mock_parse_coverage.called)
         self.assertTrue(self.build.succeeded)
         self.assertTrue(self.build.finished)
 
@@ -80,7 +80,7 @@ class BuildTests(unittest.TestCase):
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_WITH_NO_SERVICES)
     def test_run_tests_fail_task(self, mock_run_task, mock_clone_repo):
         self.build.run_tests()
-        mock_clone_repo.assert_called_once()
+        self.assertTrue(mock_clone_repo.called)
         mock_run_task.assert_called_once_with('tox')
         self.assertFalse(self.build.succeeded)
         self.assertTrue(self.build.finished)
@@ -103,7 +103,7 @@ class BuildTests(unittest.TestCase):
     @mock.patch('docker.manager.Docker.run')
     def test_delete_working_dir(self, mock_local_run, mock_directory_exist):
         self.build.delete_working_dir()
-        mock_directory_exist.assert_called_once()
+        self.assertTrue(mock_directory_exist.called)
         mock_local_run.assert_called_once_with('rm -rf ~/builds/1')
 
     @mock.patch('docker.manager.Docker.run')
