@@ -41,6 +41,7 @@ setup(
         'frigg-test-discovery>=1.0.0,<2.0.0',
         'docker-wrapper>=1.0,<1.1',
         'pyyaml==3.11',
+        'requests>=2.0.0,<3.0.0',
         'raven==5.5.0'
     ],
     entry_points={
