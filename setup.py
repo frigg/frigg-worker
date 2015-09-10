@@ -39,7 +39,7 @@ setup(
         'click==5.1',
         'frigg-coverage>=1.0.0,<2.0.0',
         'frigg-test-discovery>=1.0.0,<2.0.0',
-        'docker-wrapper>=1.0,<1.1',
+        'docker-wrapper>=1.0,<1.1',  # rq.filter: <2.0
         'pyyaml==3.11',
         'requests>=2.0.0,<3.0.0',
         'raven==5.5.0'
