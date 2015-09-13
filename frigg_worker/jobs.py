@@ -4,9 +4,10 @@ import logging
 import os
 
 import requests
+from frigg_settings import build_settings
 
 from . import api
-from .build_helpers import build_settings, cached_property
+from .build_helpers import cached_property
 
 logger = logging.getLogger(__name__)
 
