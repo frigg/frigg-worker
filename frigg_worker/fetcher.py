@@ -20,24 +20,22 @@ from .deployments import Deployment
 logger = logging.getLogger(__name__)
 
 
-def fetch_builds(**options):
+def fetcher(options, callback):
     notify_of_upstart(options)
     while options['dispatcher_url']:
         task = fetch_task(options['dispatcher_url'], options['dispatcher_token'])
         if task:
-            start_build(task, options)
+            callback(task, options)
 
         time.sleep(5.0 + random.randint(1, 100) / 100)
+
+
+def fetch_builds(**options):
+    return fetcher(options, start_build)
 
 
 def fetch_deployments(**options):
-    notify_of_upstart(options)
-    while options['dispatcher_url']:
-        task = fetch_task(options['dispatcher_url'], options['dispatcher_token'])
-        if task:
-            start_deployment(task, options)
-
-        time.sleep(5.0 + random.randint(1, 100) / 100)
+    return fetcher(options, start_deployment)
 
 
 def start_build(task, options):
