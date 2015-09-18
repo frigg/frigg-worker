@@ -3,12 +3,14 @@ import json
 import logging
 import random
 import socket
+import sys
 import time
 
 import docker
 import frigg_coverage
 import frigg_settings
 import frigg_test_discovery
+import pip
 import requests
 from docker.manager import Docker
 
@@ -16,6 +18,7 @@ import frigg_worker
 
 from .builds import Build
 from .deployments import Deployment
+from .errors import ApiError
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +26,13 @@ logger = logging.getLogger(__name__)
 def fetcher(options, callback):
     notify_of_upstart(options)
     while options['dispatcher_url']:
-        task = fetch_task(options['dispatcher_url'], options['dispatcher_token'])
-        if task:
-            callback(task, options)
+        try:
+            task = fetch_task(options['dispatcher_url'], options['dispatcher_token'])
+            if task:
+                callback(task, options)
+        except ApiError as error:
+            if error.code == 'OUTDATED':
+                return upgrade()
 
         time.sleep(5.0 + random.randint(1, 100) / 100)
 
@@ -92,6 +99,8 @@ def fetch_task(dispatcher_url, dispatcher_token):
 
         if response.status_code == 200:
             return response.json()['job']
+        else:
+            raise ApiError(response.json()['error'])
     except requests.exceptions.ConnectionError as e:
         logger.exception(e)
 
@@ -107,3 +116,12 @@ def notify_of_upstart(options):
             'text': 'I just started on host {host}, looking for work now...'.format(host=host),
             'username': 'frigg-worker',
         }))
+
+
+def upgrade():
+    logger.info('Upgrading worker')
+    pip.main(['install', '-U', 'frigg-worker'])
+    pip.main(['install', '-U', 'frigg-settings'])
+    pip.main(['install', '-U', 'frigg-test-discovery'])
+    pip.main(['install', '-U', 'docker-wrapper-py'])
+    sys.exit(1)
