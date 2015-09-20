@@ -5,8 +5,14 @@ import random
 import socket
 import time
 
+import docker
+import frigg_coverage
+import frigg_settings
+import frigg_test_discovery
 import requests
 from docker.manager import Docker
+
+import frigg_worker
 
 from .builds import Build
 from .deployments import Deployment
@@ -77,7 +83,12 @@ def fetch_task(dispatcher_url, dispatcher_token):
         response = requests.get(
             dispatcher_url,
             headers={
-                'x-frigg-worker-token': dispatcher_token
+                'x-frigg-worker-token': dispatcher_token,
+                'x-frigg-worker-version': getattr(frigg_worker, '__version__', ''),
+                'x-frigg-settings-version': getattr(frigg_settings, '__version__', ''),
+                'x-frigg-coverage-version': getattr(frigg_coverage, '__version__', ''),
+                'x-frigg-test-discovery-version': getattr(frigg_test_discovery, '__version__', ''),
+                'x-docker-wrapper-version': getattr(docker, '__version__', ''),
             }
         )
 
