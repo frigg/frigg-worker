@@ -42,7 +42,7 @@ setup(
         'docker-wrapper>=2.0,<2.1',  # rq.filter: <2.0
         'pyyaml==3.11',
         'requests>=2.0.0,<3.0.0',
-        'raven==5.6.0'
+        'raven==5.7.2'
     ],
     entry_points={
         'console_scripts': ['frigg-worker = frigg_worker.cli:start']
