@@ -219,6 +219,7 @@ class BuildTests(unittest.TestCase):
 
     @mock.patch('frigg_worker.jobs.build_settings', lambda *x: BUILD_SETTINGS_PREVIEW)
     def test_serializer_preview_settings(self):
+        self.job.settings  # load the settings object
         serialized = Job.serializer(self.job)
         self.assertEqual(serialized['settings']['preview']['image'], 'frigg/frigg-test-base')
         self.assertEqual(serialized['settings']['preview']['tasks'], ['gunicorn'])
