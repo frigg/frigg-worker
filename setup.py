@@ -38,7 +38,7 @@ setup(
     install_requires=[
         'click==5.1',
         'frigg-coverage>=1.0.0,<2.0.0',
-        'frigg-settings>=1.0.0,<2.0.0',
+        'frigg-settings>=1.1.1,<2.0.0',
         'docker-wrapper>=2.0,<2.1',  # rq.filter: <2.0
         'pyyaml==3.11',
         'requests>=2.0.0,<3.0.0',
