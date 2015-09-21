@@ -7,7 +7,6 @@ import requests
 from frigg_settings import build_settings
 
 from . import api
-from .build_helpers import cached_property
 
 logger = logging.getLogger(__name__)
 
@@ -84,9 +83,13 @@ class Job(object):
                 return False
         return True
 
-    @cached_property
+    @property
     def settings(self):
-        return build_settings(self.working_directory, self.docker)
+        try:
+            return self._settings
+        except AttributeError:
+            self._settings = build_settings(self.working_directory, self.docker)
+            return self._settings
 
     def clone_repo(self, depth=10):
         depth_string = ''
@@ -181,7 +184,7 @@ class Job(object):
     def serializer(cls, obj):
         out = {}
         if isinstance(obj, Job):
-            unwanted = ['worker_options', 'api', 'docker']
+            unwanted = ['worker_options', 'api', 'docker', '_settings']
             for key in obj.__dict__.keys():
                 if key not in unwanted:
                     out[key] = obj.__dict__[key]
@@ -193,8 +196,8 @@ class Job(object):
                               for key in obj.tasks]
 
             try:
-                out['settings'] = obj.settings
-            except RuntimeError:
+                out['settings'] = obj._settings
+            except (RuntimeError, AttributeError):
                 pass
 
         return out
