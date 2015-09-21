@@ -123,5 +123,5 @@ def upgrade():
     pip.main(['install', '-U', 'frigg-worker'])
     pip.main(['install', '-U', 'frigg-settings'])
     pip.main(['install', '-U', 'frigg-test-discovery'])
-    pip.main(['install', '-U', 'docker-wrapper-py'])
+    pip.main(['install', '-U', 'docker-wrapper'])
     sys.exit(1)

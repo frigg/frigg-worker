@@ -109,5 +109,5 @@ class FetcherTests(TestCase):
             call(['install', '-U', 'frigg-worker']),
             call(['install', '-U', 'frigg-settings']),
             call(['install', '-U', 'frigg-test-discovery']),
-            call(['install', '-U', 'docker-wrapper-py'])
+            call(['install', '-U', 'docker-wrapper'])
         ])
