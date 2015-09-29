@@ -18,7 +18,7 @@ class APIWrapper(object):
         return {
             'content-type': 'application/json',
             'FRIGG_WORKER_TOKEN': self.token,
-            'x-frigg-worker-host': socket.gethostname()
+            'x-frigg-worker-host': socket.getfqdn()
         }
 
     def get(self, url):

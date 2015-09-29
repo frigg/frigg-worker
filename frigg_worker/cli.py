@@ -35,7 +35,7 @@ def start(mode, **kwargs):
     except ImportError:
         options['sentry'] = None
 
-    options['worker_host'] = socket.gethostname()
+    options['worker_host'] = socket.getfqdn()
 
     _start(mode, **options)
 

@@ -89,7 +89,7 @@ def fetch_task(dispatcher_url, dispatcher_token):
             dispatcher_url,
             headers={
                 'x-frigg-worker-token': dispatcher_token,
-                'x-frigg-worker-host': socket.gethostname(),
+                'x-frigg-worker-host': socket.getfqdn(),
                 'x-frigg-worker-version': getattr(frigg_worker, '__version__', ''),
                 'x-frigg-settings-version': getattr(frigg_settings, '__version__', ''),
                 'x-frigg-coverage-version': getattr(frigg_coverage, '__version__', ''),
@@ -110,7 +110,7 @@ def fetch_task(dispatcher_url, dispatcher_token):
 
 def notify_of_upstart(options):
     if options['slack_url']:
-        host = socket.gethostname()
+        host = socket.getfqdn()
         requests.post(options['slack_url'], json.dumps({
             'icon_emoji': options['slack_icon'],
             'channel': options['slack_channel'],
