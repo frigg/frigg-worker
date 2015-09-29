@@ -89,6 +89,7 @@ def fetch_task(dispatcher_url, dispatcher_token):
             dispatcher_url,
             headers={
                 'x-frigg-worker-token': dispatcher_token,
+                'x-frigg-worker-host': socket.gethostname(),
                 'x-frigg-worker-version': getattr(frigg_worker, '__version__', ''),
                 'x-frigg-settings-version': getattr(frigg_settings, '__version__', ''),
                 'x-frigg-coverage-version': getattr(frigg_coverage, '__version__', ''),

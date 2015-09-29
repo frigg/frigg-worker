@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import socket
 
 import requests
 
@@ -16,7 +17,8 @@ class APIWrapper(object):
     def headers(self):
         return {
             'content-type': 'application/json',
-            'FRIGG_WORKER_TOKEN': self.token
+            'FRIGG_WORKER_TOKEN': self.token,
+            'x-frigg-worker-host': socket.gethostname()
         }
 
     def get(self, url):
