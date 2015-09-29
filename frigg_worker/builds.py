@@ -17,9 +17,9 @@ class Build(Job):
             return self.error('git clone', 'Access denied')
 
         try:
-            self.start_services()
             self.finished = False
             self.create_pending_tasks()
+            self.start_services()
             self.report_run()
 
             for task in self.settings['setup_tasks']:
