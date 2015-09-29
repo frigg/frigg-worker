@@ -117,13 +117,9 @@ class BuildTests(unittest.TestCase):
 
         mock_docker_run.assert_has_calls([
             mock.call('sudo service redis-server start'),
-            mock.call().succeeded.__bool__(),
             mock.call('sudo service postgresql start'),
-            mock.call().succeeded.__bool__(),
             mock.call('sudo service nginx start'),
-            mock.call().succeeded.__bool__(),
             mock.call('sudo service mongodb start'),
-            mock.call().succeeded.__bool__(),
             mock.call('apt-get install nginx', self.build.working_directory),
             mock.call('tox', self.build.working_directory),
         ])

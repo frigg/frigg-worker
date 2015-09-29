@@ -60,10 +60,12 @@ class Job(object):
     def __init__(self, build_id, obj, docker, worker_options=None):
         self.__dict__.update(obj)
         self.id = build_id
-        self.results = {}
         self.tasks = []
+        self.results = {}
         self.setup_tasks = []
         self.setup_results = {}
+        self.service_tasks = []
+        self.service_results = {}
         self.finished = False
         self.docker = docker
         self.worker_options = worker_options
@@ -125,10 +127,17 @@ class Job(object):
             logger.error(message, extra={'stdout': clone.out, 'stderr': clone.err})
         return clone.succeeded
 
+    @staticmethod
+    def create_service_command(service):
+        return 'sudo service {0} start'.format(service)
+
     def start_services(self):
         for service in self.settings['services']:
-            if not self.docker.run('sudo service {0} start'.format(service)).succeeded:
-                logger.warning('Service "{0}" did not start.'.format(service))
+            self.start_service(self.create_service_command(service))
+
+    def start_service(self, task_command):
+        run_result = self.docker.run(task_command)
+        self.service_results[task_command].update_result(run_result)
 
     def run_task(self, task_command):
         run_result = self.docker.run(task_command, self.working_directory)
@@ -144,6 +153,11 @@ class Job(object):
         create a list on self.tasks that is used to make sure the serialization of the results
         creates a correctly ordered list.
         """
+        for task in self.settings['services']:
+            task = self.create_service_command(task)
+            self.service_tasks.append(task)
+            self.service_results[task] = Result(task)
+
         for task in self.settings['setup_tasks']:
             self.setup_tasks.append(task)
             self.setup_results[task] = Result(task)
@@ -189,11 +203,10 @@ class Job(object):
                 if key not in unwanted:
                     out[key] = obj.__dict__[key]
 
-            out['setup_results'] = [Result.serialize(obj.setup_results[key])
-                                    for key in obj.setup_tasks]
-
-            out['results'] = [Result.serialize(obj.results[key])
-                              for key in obj.tasks]
+            out['setup_results'] = cls.serialize_results_list(obj.setup_tasks, obj.setup_results)
+            out['results'] = cls.serialize_results_list(obj.tasks, obj.results)
+            out['service_results'] = cls.serialize_results_list(obj.service_tasks,
+                                                                obj.service_results)
 
             try:
                 out['settings'] = obj._settings
@@ -201,3 +214,7 @@ class Job(object):
                 pass
 
         return out
+
+    @staticmethod
+    def serialize_results_list(tasks, results):
+        return [Result.serialize(results[key]) for key in tasks]
