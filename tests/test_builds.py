@@ -5,6 +5,7 @@ from unittest import mock
 from docker.manager import Docker
 
 from frigg_worker.builds import Build
+from frigg_worker.errors import GitCloneError
 
 DATA = {
     'id': 1,
@@ -50,6 +51,8 @@ WORKER_OPTIONS = {
     'hq_token': 'tokened',
 }
 
+GIT_ERROR = GitCloneError('UNKNOWN', '', '', True)
+
 
 class BuildTests(unittest.TestCase):
     def setUp(self):
@@ -86,8 +89,8 @@ class BuildTests(unittest.TestCase):
         self.assertTrue(self.build.finished)
 
     @mock.patch('frigg_worker.builds.Build.run_task')
-    @mock.patch('frigg_worker.builds.Build.clone_repo', lambda x: False)
-    def test_run_tests_fail_clone(self, mock_run_task):
+    @mock.patch('frigg_worker.builds.Build.clone_repo', side_effect=GIT_ERROR)
+    def test_run_tests_fail_clone(self, mock_clone, mock_run_task):
         self.build.run_tests()
         self.assertFalse(mock_run_task.called)
         self.assertFalse(self.build.succeeded)
