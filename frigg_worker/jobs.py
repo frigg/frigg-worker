@@ -121,9 +121,9 @@ class Job(object):
 
         clone = self.docker.run(command.format(build=self, depth=depth_string))
         if not clone.succeeded:
-            output = clone.out + clone.stderr
+            output = clone.out + clone.err
             commit_errors = [
-                'fatal: reference is not a tree: {build.hash}'.format(build=self),
+                'fatal: reference is not a tree: {build.sha}'.format(build=self),
                 'Could not parse object \'{build.sha}\''.format(build=self),
             ]
             if commit_errors[0] in output or commit_errors[1] in output:
@@ -141,7 +141,7 @@ class Job(object):
                             ' origin'.format(build=self))
             if branch_error in output:
                 raise GitCloneError(
-                    'MSSING_BRANCH',
+                    'MISSING_BRANCH',
                     clone.out,
                     clone.err,
                     report_build_as_error=True
@@ -170,7 +170,7 @@ class Job(object):
         return clone.succeeded
 
     def handle_clone_error(self, error):
-        logger.exception(error)
+        logger.exception(error, extra=error.__dict__)
         if error.report_build_as_error:
             self.error('', 'Could not clone git repo')
             self.report_run()
