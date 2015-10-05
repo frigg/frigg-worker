@@ -45,19 +45,35 @@ def fetch_deployments(**options):
     return fetcher(options, start_deployment)
 
 
+def valid_image(job, task):
+    if not task['image']:
+        job.error('', 'No image specified for docker')
+        return False
+
+    if not task['image'].startswith('frigg/'):
+        job.error('', 'Only frigg/ images are allowed to use')
+        return False
+
+    return True
+
+
 def start_build(task, options):
     docker_options = {
-        'image': options['docker_image'],
+        'image': task['image'],
         'combine_outputs': True,
         'privilege': True,
         'env_variables': {'CI': 'frigg', 'GH_TOKEN': task['gh_token']},
         'name_prefix': 'build'
     }
+
     with Docker(**docker_options) as docker:
         try:
             build = Build(task['id'], task, docker=docker, worker_options=options)
-            logger.info('Starting {0}'.format(task))
-            build.run_tests()
+
+            if valid_image(build, task):
+                logger.info('Starting {0}'.format(task))
+                build.run_tests()
+
         except Exception as e:
             logger.exception(e)
 
@@ -76,7 +92,10 @@ def start_deployment(task, options):
     docker.start()
     try:
         deployment = Deployment(task['id'], task, docker=docker, worker_options=options)
-        deployment.run_deploy()
+
+        if valid_image(deployment, task):
+            deployment.run_deploy()
+
     except Exception as e:
         docker.stop()
         raise e
