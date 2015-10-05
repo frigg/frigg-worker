@@ -56,6 +56,7 @@ class Job(object):
     finished = False
     worker_host = None
     gh_token = ''
+    image = ''
 
     def __init__(self, build_id, obj, docker, worker_options=None):
         self.__dict__.update(obj)

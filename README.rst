@@ -30,14 +30,11 @@ Usage
       --slack-url TEXT         URL for incoming webhook in slack
       --sentry-dsn TEXT        Sentry dsn needed to connect to the sentry API
       --loglevel TEXT          Set log level for frigg-packages
-      --docker-image TEXT      The docker image, could be either from the registry
-                               or a local tag.
       --help                   Show this message and exit.
 
 
 The worker has two modes `builder` and `deployer` which defines whether the worker should
-build and run tests or deploy previews. The `--docker-image` option is ignored in deployer
-mode.
+build and run tests or deploy previews.
 
 Builder
 ~~~~~~~
