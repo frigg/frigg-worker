@@ -19,8 +19,6 @@ logger = logging.getLogger('frigg_worker.cli')
 @click.option('--slack-url', default=None, help='URL for incoming webhook in slack')
 @click.option('--sentry-dsn', default=None, help='Sentry dsn needed to connect to the sentry API')
 @click.option('--loglevel', default='DEBUG', help='Set log level for frigg-packages')
-@click.option('--docker-image', default='frigg/frigg-test-base:latest',
-              help='The docker image, could be either from the registry or a local tag.')
 def start(mode, **kwargs):
     options = {
         'slack_icon': ':monkey_face:',

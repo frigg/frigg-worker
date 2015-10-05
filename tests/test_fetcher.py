@@ -10,7 +10,6 @@ from frigg_worker.fetcher import fetch_task, fetcher, start_build, start_deploym
 FETCH_OPTIONS = {
     'hq_url': None,
     'slack_url': None,
-    'docker_image': 'frigg/frigg-test-base:latest',
     'hq_token': None,
     'loglevel': 'DEBUG',
     'dispatcher_url': 'http://example.com',
@@ -27,8 +26,8 @@ class FetcherTests(TestCase):
         start_build({
             'id': 1,
             'gh_token': 'a-token-one-might-say',
+            'image': 'frigg/frigg-test-base'
         }, {
-            'docker_image': 'frigg/frigg-test-base:latest',
             'hq_token': 'test_token',
             'hq_url': 'url'
         })
@@ -37,7 +36,7 @@ class FetcherTests(TestCase):
         mock_docker.assert_called_once_with(
             privilege=True,
             combine_outputs=True,
-            image='frigg/frigg-test-base:latest',
+            image='frigg/frigg-test-base',
             name_prefix='build',
             env_variables={'CI': 'frigg', 'GH_TOKEN': 'a-token-one-might-say'}
         )
