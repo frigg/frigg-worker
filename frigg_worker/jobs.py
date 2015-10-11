@@ -2,9 +2,12 @@
 import json
 import logging
 import os
+import sys
 
 import requests
 from frigg_settings import build_settings
+
+from frigg_worker.errors import GitCloneError
 
 from . import api
 
@@ -118,15 +121,61 @@ class Job(object):
 
         clone = self.docker.run(command.format(build=self, depth=depth_string))
         if not clone.succeeded:
-            if 'Could not parse object \'{0}\''.format(self.sha) in clone.out:
-                logger.warning('Could not checkout commit', extra={'build': self.serializer(self)})
+            output = clone.out + clone.err
+            commit_errors = [
+                'fatal: reference is not a tree: {build.sha}'.format(build=self),
+                'Could not parse object \'{build.sha}\''.format(build=self),
+            ]
+            if commit_errors[0] in output or commit_errors[1] in output:
                 self.delete_working_dir()
                 if depth > 0:
                     return self.clone_repo(depth=0)
-                return False
-            message = 'Access denied to {build.owner}/{build.name}'.format(build=self)
+
+                raise GitCloneError(
+                    'MISSING_COMMIT',
+                    clone.out,
+                    clone.err,
+                    report_build_as_error=True
+                )
+            branch_error = ('Remote branch {build.branch} not found in upstream'
+                            ' origin'.format(build=self))
+            if branch_error in output:
+                raise GitCloneError(
+                    'MISSING_BRANCH',
+                    clone.out,
+                    clone.err,
+                    report_build_as_error=True
+                )
+
+            if 'Could not resolve host:' in output:
+                raise GitCloneError(
+                    'DNS',
+                    clone.out,
+                    clone.err,
+                    report_build_as_error=False,
+                    worker_should_quit=True
+                )
+
+            if 'Empty reply from server' in output:
+                raise GitCloneError(
+                    'EMPTY_REPLY',
+                    clone.out,
+                    clone.err,
+                    report_build_as_error=False
+                )
+
+            message = 'Git clone for {build.owner}/{build.name} failed'.format(build=self)
             logger.error(message, extra={'stdout': clone.out, 'stderr': clone.err})
+            raise GitCloneError('UNKNOWN', clone.out, clone.err, report_build_as_error=False)
         return clone.succeeded
+
+    def handle_clone_error(self, error):
+        logger.exception(error, extra=error.__dict__)
+        if error.report_build_as_error:
+            self.error('', 'Could not clone git repo')
+            self.report_run()
+        if error.worker_should_quit:
+            sys.exit(1)
 
     @staticmethod
     def create_service_command(service):

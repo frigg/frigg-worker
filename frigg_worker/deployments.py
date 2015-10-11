@@ -3,6 +3,8 @@ import os
 
 import yaml
 
+from frigg_worker.errors import GitCloneError
+
 from .jobs import Job, Result
 
 logger = logging.getLogger(__name__)
@@ -17,8 +19,11 @@ class Deployment(Job):
     def run_deploy(self):
         task = None
         self.delete_working_dir()
-        if not self.clone_repo():
-            return self.error('git clone', 'Access denied')
+
+        try:
+            self.clone_repo()
+        except GitCloneError as error:
+            return self.handle_clone_error(error)
 
         self.load_preset()
 

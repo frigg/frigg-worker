@@ -5,6 +5,7 @@ from unittest import mock
 from docker.manager import Docker
 
 from frigg_worker.deployments import Deployment
+from frigg_worker.errors import GitCloneError
 
 DATA = {
     'id': 1,
@@ -37,6 +38,8 @@ WORKER_OPTIONS = {
     'hq_url': 'http://example.com/hq',
     'hq_token': 'tokened',
 }
+
+GIT_ERROR = GitCloneError('UNKNOWN', '', '', True)
 
 
 class DeploymentTests(unittest.TestCase):
@@ -74,8 +77,8 @@ class DeploymentTests(unittest.TestCase):
         self.assertTrue(self.deployment.finished)
 
     @mock.patch('frigg_worker.deployments.Deployment.run_task')
-    @mock.patch('frigg_worker.deployments.Deployment.clone_repo', lambda x: False)
-    def test_run_deploy_fail_clone(self, mock_run_task):
+    @mock.patch('frigg_worker.deployments.Deployment.clone_repo', side_effect=GIT_ERROR)
+    def test_run_deploy_fail_clone(self, mock_clone, mock_run_task):
         self.deployment.run_deploy()
         self.assertFalse(mock_run_task.called)
         self.assertFalse(self.deployment.succeeded)

@@ -3,6 +3,8 @@ import os
 
 from frigg_coverage import parse_coverage
 
+from frigg_worker.errors import GitCloneError
+
 from .jobs import Job
 
 logger = logging.getLogger(__name__)
@@ -13,8 +15,11 @@ class Build(Job):
     def run_tests(self):
         task = None
         self.delete_working_dir()
-        if not self.clone_repo():
-            return self.error('git clone', 'Access denied')
+
+        try:
+            self.clone_repo()
+        except GitCloneError as error:
+            return self.handle_clone_error(error)
 
         try:
             self.finished = False

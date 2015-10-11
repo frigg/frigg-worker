@@ -69,11 +69,11 @@ def start_build(task, options):
     with Docker(**docker_options) as docker:
         try:
             build = Build(task['id'], task, docker=docker, worker_options=options)
-
             if valid_image(build, task):
                 logger.info('Starting {0}'.format(task))
                 build.run_tests()
 
+            return build
         except Exception as e:
             logger.exception(e)
 
@@ -96,6 +96,7 @@ def start_deployment(task, options):
         if valid_image(deployment, task):
             deployment.run_deploy()
 
+        return deployment
     except Exception as e:
         docker.stop()
         raise e
