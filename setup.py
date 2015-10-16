@@ -41,7 +41,7 @@ setup(
         'frigg-settings>=1.1.1,<2.0.0',
         'docker-wrapper>=2.1,<2.2',  # rq.filter: <2.0
         'pyyaml==3.11',
-        'requests>=2.0.0,<3.0.0',
+        'requests>=2.8.1,<3.0.0',
         'raven==5.7.2'
     ],
     entry_points={
