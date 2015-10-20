@@ -37,11 +37,11 @@ setup(
     include_package_data=True,
     install_requires=[
         'click==5.1',
-        'frigg-coverage>=1.0.0,<2.0.0',
+        'frigg-coverage>=1.1.1,<2.0.0',
         'frigg-settings>=1.1.1,<2.0.0',
         'docker-wrapper>=2.1,<2.2',  # rq.filter: <2.0
         'pyyaml==3.11',
-        'requests>=2.0.0,<3.0.0',
+        'requests>=2.8.1,<3.0.0',
         'raven==5.7.2'
     ],
     entry_points={
