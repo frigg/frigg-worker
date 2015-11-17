@@ -1,5 +1,5 @@
-frigg-worker |Build status| |Coverage status| |reqiuresio|
-==========================================================
+frigg-worker |Build status| |Coverage status|
+=============================================
 
 A worker application that listens to the frigg broker an pick up builds
 and build them.
@@ -66,6 +66,3 @@ MIT © frigg.io
    :target: https://ci.frigg.io/frigg/frigg-worker/
 .. |Coverage status| image:: https://ci.frigg.io/badges/coverage/frigg/frigg-worker/
    :target: https://ci.frigg.io/frigg/frigg-worker/
-.. |reqiuresio| image:: https://requires.io/github/frigg/frigg-worker/requirements.svg?branch=master
-     :target: https://requires.io/github/frigg/frigg-worker/requirements/?branch=master
-     :alt: Requirements Status
