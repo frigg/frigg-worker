@@ -1,8 +1,8 @@
 frigg-worker |Build status| |Coverage status|
 =============================================
 
-A worker application that listens to the frigg broker an pick up builds
-and build them.
+A worker application that listens to the frigg broker, picks up builds
+and builds them.
 
 Setup
 -----
