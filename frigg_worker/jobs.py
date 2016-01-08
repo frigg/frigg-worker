@@ -70,6 +70,8 @@ class Job(object):
         self.setup_results = {}
         self.service_tasks = []
         self.service_results = {}
+        self.after_tasks = []
+        self.after_results = {}
         self.finished = False
         self.docker = docker
         self.worker_options = worker_options
@@ -96,6 +98,12 @@ class Job(object):
         except AttributeError:
             self._settings = build_settings(self.working_directory, self.docker)
             return self._settings
+
+    @property
+    def after_tasks_key(self):
+        if self.succeeded:
+            return 'after_success'
+        return 'after_failure'
 
     def clone_repo(self, depth=10):
         depth_string = ''
@@ -197,6 +205,10 @@ class Job(object):
         run_result = self.docker.run(task_command, self.working_directory)
         self.setup_results[task_command].update_result(run_result)
 
+    def run_after_task(self, task_command):
+        run_result = self.docker.run(task_command, self.working_directory)
+        self.after_results[task_command].update_result(run_result)
+
     def create_pending_tasks(self):
         """
         Creates pending task results in a dict on self.result with task string as key. It will also
@@ -214,6 +226,16 @@ class Job(object):
 
         for task in self.settings.tasks['tests']:
             self.tasks.append(task)
+            self.results[task] = Result(task)
+
+    def create_pending_after_task(self):
+        """
+        Creates pending task results in a dict on self.after_result with task string as key.
+        It will also create a list on self.tasks that is used to make sure the serialization
+        of the results creates a correctly ordered list.
+        """
+        for task in self.settings.tasks[self.after_tasks_key]:
+            self.after_tasks.append(task)
             self.results[task] = Result(task)
 
     def delete_working_dir(self):
@@ -257,6 +279,7 @@ class Job(object):
             out['results'] = cls.serialize_results_list(obj.tasks, obj.results)
             out['service_results'] = cls.serialize_results_list(obj.service_tasks,
                                                                 obj.service_results)
+            out['after_results'] = cls.serialize_results_list(obj.after_tasks, obj.after_results)
 
             try:
                 out['settings'] = obj._settings.__dict__
