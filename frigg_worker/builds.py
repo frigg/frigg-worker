@@ -35,6 +35,13 @@ class Build(Job):
                 self.run_task(task)
                 self.report_run()
 
+            if self.settings.has_after_tasks(self.succeeded):
+                self.create_pending_after_task()
+                self.report_run()
+                for task in self.settings.tasks[self.after_tasks_key]:
+                    self.run_after_task(task)
+                    self.report_run()
+
             self.parse_coverage()
 
         except Exception as e:

@@ -193,6 +193,8 @@ class BuildTests(unittest.TestCase):
 
         self.job.tasks.append('tox')
         self.job.setup_tasks.append('apt-get install nginx')
+        self.job.after_tasks.append('semantic-release publish')
+        self.job.after_results['semantic-release publish'] = Result('semantic-release publish')
         self.job.results['tox'] = Result('tox')
         self.job.setup_results['apt-get install nginx'] = Result('apt-get install nginx')
         serialized = Job.serializer(self.job)
@@ -210,10 +212,19 @@ class BuildTests(unittest.TestCase):
         setup_result.return_code = 0
         self.job.setup_results['apt-get install nginx'].update_result(setup_result)
 
+        result = ProcessResult('semantic-release publish')
+        result.out = 'Success'
+        result.return_code = 0
+        self.job.after_results['semantic-release publish'].update_result(result)
+
         self.assertEqual(serialized['results'], [{'task': 'tox', 'pending': False, 'log': 'Success',
                                                   'return_code': 0, 'succeeded': True}])
 
         self.assertEqual(serialized['setup_results'], [{'task': 'apt-get install nginx',
+                                                        'pending': False, 'log': 'Success',
+                                                        'return_code': 0, 'succeeded': True}])
+
+        self.assertEqual(serialized['after_results'], [{'task': 'semantic-release publish',
                                                         'pending': False, 'log': 'Success',
                                                         'return_code': 0, 'succeeded': True}])
         self.assertIn('worker_host', serialized)

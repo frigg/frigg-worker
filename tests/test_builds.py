@@ -2,6 +2,7 @@
 import unittest
 from unittest import mock
 
+from docker.helpers import ProcessResult
 from docker.manager import Docker
 from frigg_settings.model import FriggSettings
 
@@ -43,6 +44,14 @@ BUILD_SETTINGS_SERVICES_AND_SETUP = FriggSettings({
     'tasks': ['tox'],
     'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
     'coverage': None,
+})
+
+BUILD_SETTINGS_WITH_AFTER_TASKS = FriggSettings({
+    'tasks': {
+        'tests': ['tox'],
+        'after_success': ['success_task'],
+        'after_failure': ['failure_task'],
+    },
 })
 
 WORKER_OPTIONS = {
@@ -127,3 +136,30 @@ class BuildTests(unittest.TestCase):
             mock.call('apt-get install nginx', self.build.working_directory),
             mock.call('tox', self.build.working_directory),
         ])
+
+
+def test_run_build_should_call_after_success_on_successful_build(mocker):
+    mocker.patch('frigg_worker.builds.Build.clone_repo')
+    mocker.patch('frigg_worker.builds.Build.run_task')
+    mocker.patch('frigg_worker.builds.Build.report_run',)
+    mocker.patch('frigg_worker.jobs.build_settings', return_value=BUILD_SETTINGS_WITH_AFTER_TASKS)
+    mock_run_after = mocker.patch('frigg_worker.builds.Build.run_after_task')
+    build = Build(1, DATA, Docker(), WORKER_OPTIONS)
+
+    build.run_tests()
+    mock_run_after.assert_called_once_with('success_task')
+
+
+def test_run_build_should_call_after_failure_on_failed_build(mocker):
+    result = ProcessResult('tox')
+    result.return_code = 1
+    mocker.patch('frigg_worker.builds.Build.clone_repo')
+    mocker.patch('frigg_worker.builds.Build.run_task')
+    mocker.patch('frigg_worker.builds.Build.report_run')
+    mocker.patch('frigg_worker.builds.Build.succeeded', False)
+    mocker.patch('frigg_worker.jobs.build_settings', return_value=BUILD_SETTINGS_WITH_AFTER_TASKS)
+    mock_run_after = mocker.patch('frigg_worker.builds.Build.run_after_task')
+    build = Build(1, DATA, Docker(), WORKER_OPTIONS)
+
+    build.run_tests()
+    mock_run_after.assert_called_once_with('failure_task')

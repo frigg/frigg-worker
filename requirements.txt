@@ -3,7 +3,7 @@
 
 click==5.1
 frigg-coverage>=1.1.1,<2.0.0
-frigg-settings>=3.0.0,<4.0.0
+frigg-settings>=3.1.1,<4.0.0
 docker-wrapper>=1.1,<1.2  # rq.filter: <2.0
 raven==5.8.1
 pyyaml==3.11
