@@ -33,7 +33,7 @@ class Deployment(Job):
             self.start_services()
             self.report_run()
 
-            for task in self.settings['setup_tasks']:
+            for task in self.settings.tasks['setup']:
                 self.run_setup_task(task)
                 self.report_run()
 
@@ -42,7 +42,7 @@ class Deployment(Job):
                     self.run_task(task)
                     self.report_run()
 
-            for task in self.settings['preview']['tasks']:
+            for task in self.settings.preview['tasks']:
                 self.run_task(task)
                 self.report_run()
 
@@ -66,7 +66,7 @@ class Deployment(Job):
         create a list on self.tasks that is used to make sure the serialization of the results
         creates a correctly ordered list.
         """
-        for task in self.settings['setup_tasks']:
+        for task in self.settings.tasks['setup']:
             self.setup_tasks.append(task)
             self.setup_results[task] = Result(task)
 
@@ -75,7 +75,7 @@ class Deployment(Job):
                 self.tasks.append(task)
                 self.results[task] = Result(task)
 
-        for task in self.settings['preview']['tasks']:
+        for task in self.settings.preview['tasks']:
             self.tasks.append(task)
             self.results[task] = Result(task)
 
@@ -87,10 +87,10 @@ class Deployment(Job):
         """
         Loads preset if it is specified in the .frigg.yml
         """
-        if 'preset' in self.settings['preview']:
+        if 'preset' in self.settings.preview:
             with open(os.path.join(os.path.dirname(__file__), 'presets.yaml')) as f:
                 presets = yaml.load(f.read())
 
-            if self.settings['preview']['preset'] in presets:
-                self.preset = presets[self.settings['preview']['preset']]
+            if self.settings.preview['preset'] in presets:
+                self.preset = presets[self.settings.preview['preset']]
             return self.preset

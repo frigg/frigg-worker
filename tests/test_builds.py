@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 from docker.manager import Docker
+from frigg_settings.model import FriggSettings
 
 from frigg_worker.builds import Build
 from frigg_worker.errors import GitCloneError
@@ -16,33 +17,33 @@ DATA = {
     'name': 'test-repo',
 }
 
-BUILD_SETTINGS_WITH_NO_SERVICES = {
+BUILD_SETTINGS_WITH_NO_SERVICES = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': [],
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
-}
+})
 
-BUILD_SETTINGS_ONE_SERVICE = {
+BUILD_SETTINGS_ONE_SERVICE = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': ['redis-server'],
     'coverage': None,
-}
+})
 
-BUILD_SETTINGS_FOUR_SERVICES = {
+BUILD_SETTINGS_FOUR_SERVICES = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
     'coverage': None,
-}
+})
 
-BUILD_SETTINGS_SERVICES_AND_SETUP = {
+BUILD_SETTINGS_SERVICES_AND_SETUP = FriggSettings({
     'setup_tasks': ['apt-get install nginx'],
     'tasks': ['tox'],
     'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
     'coverage': None,
-}
+})
 
 WORKER_OPTIONS = {
     'dispatcher_url': 'http://example.com/dispatch',

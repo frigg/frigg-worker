@@ -4,6 +4,7 @@ from unittest import mock
 
 from docker.helpers import ProcessResult
 from docker.manager import Docker
+from frigg_settings import FriggSettings
 from raven import Client
 
 from frigg_worker.jobs import Job, Result
@@ -17,41 +18,41 @@ DATA = {
     'name': 'test-repo',
 }
 
-BUILD_SETTINGS_WITH_NO_SERVICES = {
+BUILD_SETTINGS_WITH_NO_SERVICES = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': [],
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
-}
+})
 
-BUILD_SETTINGS_ONE_SERVICE = {
+BUILD_SETTINGS_ONE_SERVICE = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': ['redis-server'],
     'coverage': None,
-}
+})
 
-BUILD_SETTINGS_FOUR_SERVICES = {
+BUILD_SETTINGS_FOUR_SERVICES = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
     'coverage': None,
-}
+})
 
-BUILD_SETTINGS_SERVICES_AND_SETUP = {
+BUILD_SETTINGS_SERVICES_AND_SETUP = FriggSettings({
     'setup_tasks': ['apt-get install nginx'],
     'tasks': ['tox'],
     'services': ['redis-server', 'postgresql', 'nginx', 'mongodb'],
     'coverage': None,
-}
+})
 
-BUILD_SETTINGS_PREVIEW = {
+BUILD_SETTINGS_PREVIEW = FriggSettings({
     'setup_tasks': [],
     'tasks': [],
     'services': [],
     'coverage': None,
     'preview': {'image': 'frigg/frigg-test-base', 'tasks': ['gunicorn']}
-}
+})
 
 WORKER_OPTIONS = {
     'dispatcher_url': 'http://example.com/dispatch',

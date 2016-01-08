@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 from docker.manager import Docker
+from frigg_settings import FriggSettings
 
 from frigg_worker.deployments import Deployment
 from frigg_worker.errors import GitCloneError
@@ -16,21 +17,21 @@ DATA = {
     'name': 'test-repo',
 }
 
-BUILD_SETTINGS_WITH_NO_SERVICES = {
+BUILD_SETTINGS_WITH_NO_SERVICES = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': [],
     'preview': {'tasks': ['pip install -r requirements.txt', 'gunicorn']},
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
-}
+})
 
-BUILD_SETTINGS_WITH_PRESET = {
+BUILD_SETTINGS_WITH_PRESET = FriggSettings({
     'setup_tasks': [],
     'tasks': ['tox'],
     'services': [],
     'preview': {'tasks': ['load_data'], 'preset': 'django-py3'},
     'coverage': {'path': 'coverage.xml', 'parser': 'python'}
-}
+})
 
 WORKER_OPTIONS = {
     'dispatcher_url': 'http://example.com/dispatch',
