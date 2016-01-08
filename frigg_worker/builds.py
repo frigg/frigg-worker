@@ -27,11 +27,11 @@ class Build(Job):
             self.start_services()
             self.report_run()
 
-            for task in self.settings['setup_tasks']:
+            for task in self.settings.tasks['setup']:
                 self.run_setup_task(task)
                 self.report_run()
 
-            for task in self.settings['tasks']:
+            for task in self.settings.tasks['tests']:
                 self.run_task(task)
                 self.report_run()
 
@@ -49,15 +49,15 @@ class Build(Job):
             logger.info('Run of build {build.id} finished.'.format(build=self))
 
     def parse_coverage(self):
-        if 'coverage' in self.settings:
+        if self.settings.coverage:
             try:
                 coverage_file = os.path.join(
                     self.working_directory,
-                    self.settings['coverage']['path']
+                    self.settings.coverage['path']
                 )
                 self.coverage = parse_coverage(
                     self.docker.read_file(coverage_file),
-                    self.settings['coverage']['parser']
+                    self.settings.coverage['parser']
                 )
             except Exception as e:
                 logger.exception(e)

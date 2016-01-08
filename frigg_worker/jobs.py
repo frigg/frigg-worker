@@ -182,7 +182,7 @@ class Job(object):
         return 'sudo service {0} start'.format(service)
 
     def start_services(self):
-        for service in self.settings['services']:
+        for service in self.settings.services:
             self.start_service(self.create_service_command(service))
 
     def start_service(self, task_command):
@@ -203,16 +203,16 @@ class Job(object):
         create a list on self.tasks that is used to make sure the serialization of the results
         creates a correctly ordered list.
         """
-        for task in self.settings['services']:
+        for task in self.settings.services:
             task = self.create_service_command(task)
             self.service_tasks.append(task)
             self.service_results[task] = Result(task)
 
-        for task in self.settings['setup_tasks']:
+        for task in self.settings.tasks['setup']:
             self.setup_tasks.append(task)
             self.setup_results[task] = Result(task)
 
-        for task in self.settings[self.MAIN_TASKS_KEY]:
+        for task in self.settings.tasks['tests']:
             self.tasks.append(task)
             self.results[task] = Result(task)
 
@@ -259,7 +259,7 @@ class Job(object):
                                                                 obj.service_results)
 
             try:
-                out['settings'] = obj._settings
+                out['settings'] = obj._settings.__dict__
             except (RuntimeError, AttributeError):
                 pass
 
