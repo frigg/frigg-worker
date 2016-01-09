@@ -236,7 +236,7 @@ class Job(object):
         """
         for task in self.settings.tasks[self.after_tasks_key]:
             self.after_tasks.append(task)
-            self.results[task] = Result(task)
+            self.after_results[task] = Result(task)
 
     def delete_working_dir(self):
         if self.docker.directory_exist(self.working_directory):
