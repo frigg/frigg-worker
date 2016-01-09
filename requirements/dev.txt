@@ -1,0 +1,8 @@
+-r base.txt
+
+# testing tools
+pytest
+pytest-xdist
+pytest-mock
+coverage
+responses
