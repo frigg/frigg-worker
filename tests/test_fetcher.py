@@ -20,25 +20,32 @@ FETCH_OPTIONS = {
 
 
 class FetcherTests(TestCase):
+    @patch(
+        'frigg_worker.fetcher.environment_variables_for_task',
+        return_value={'FRIGG_CI': 'true'}
+    )
     @patch('frigg_worker.fetcher.Docker')
     @patch('frigg_worker.builds.Build.run_tests')
-    def test_start_build(self, mock_run_tests, mock_docker):
+    def test_start_build(self, mock_run_tests, mock_docker, mock_env_variables):
         start_build({
             'id': 1,
             'gh_token': 'a-token-one-might-say',
-            'image': 'frigg/frigg-test-base'
+            'image': 'frigg/frigg-test-base',
+            'branch': 'master',
+            'sha': 'hash'
         }, {
             'hq_token': 'test_token',
             'hq_url': 'url'
         })
 
-        self.assertTrue(mock_run_tests.called)
+        assert mock_run_tests.called
+        assert mock_env_variables.called
         mock_docker.assert_called_once_with(
             privilege=True,
             combine_outputs=True,
             image='frigg/frigg-test-base',
             name_prefix='build',
-            env_variables={'CI': 'frigg', 'GH_TOKEN': 'a-token-one-might-say'}
+            env_variables={'FRIGG_CI': 'true'}
         )
 
     @patch('frigg_worker.fetcher.Docker')
