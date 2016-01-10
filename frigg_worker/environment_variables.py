@@ -29,5 +29,11 @@ def environment_variables_for_task(task):
     if 'build_number' in task:
         env['FRIGG_BUILD_NUMBER'] = task['build_number']
 
+    if 'secrets' in task:
+        env.update(task['secrets'])
+
+    if 'environment_variables' in task:
+        env.update(task['environment_variables'])
+
     return env
 

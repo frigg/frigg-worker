@@ -14,8 +14,27 @@ def task():
 
 
 @pytest.fixture
+def task_with_secrets(task):
+    fixture = {
+        'secrets': {
+            'PYPI_PASSWORD': 'a password',
+        },
+        'environment_variables': {
+            'PYPI_USERNAME': 'frigg',
+        }
+    }
+    fixture.update(task)
+    return fixture
+
+
+@pytest.fixture
 def variables(task):
     return environment_variables_for_task(task)
+
+
+@pytest.fixture
+def variables_with_secrets(task_with_secrets):
+    return environment_variables_for_task(task_with_secrets)
 
 
 def test_should_add_ci_variables(variables):
@@ -71,3 +90,11 @@ def test_should_add_build_number(task):
     variables = environment_variables_for_task(task_with_build_number)
 
     assert variables['FRIGG_BUILD_NUMBER'] == 42
+
+
+def test_should_add_secrets(variables_with_secrets):
+    assert variables_with_secrets['PYPI_PASSWORD'] == 'a password'
+
+
+def test_should_add_environment_variables_from_task(variables_with_secrets):
+    assert variables_with_secrets['PYPI_USERNAME'] == 'frigg'
