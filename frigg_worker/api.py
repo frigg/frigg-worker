@@ -18,6 +18,7 @@ class APIWrapper(object):
         return {
             'content-type': 'application/json',
             'FRIGG_WORKER_TOKEN': self.token,
+            'x-frigg-worker-token': self.token,
             'x-frigg-worker-host': socket.getfqdn()
         }
 
