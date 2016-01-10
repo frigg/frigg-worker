@@ -15,7 +15,7 @@ import requests
 from docker.manager import Docker
 
 import frigg_worker
-
+from .environment_variables import environment_variables_for_task
 from .builds import Build
 from .deployments import Deployment
 from .errors import ApiError
@@ -62,7 +62,7 @@ def start_build(task, options):
         'image': task['image'],
         'combine_outputs': True,
         'privilege': True,
-        'env_variables': {'CI': 'frigg', 'GH_TOKEN': task['gh_token']},
+        'env_variables': environment_variables_for_task(task),
         'name_prefix': 'build'
     }
 
