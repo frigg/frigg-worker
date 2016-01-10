@@ -36,4 +36,3 @@ def environment_variables_for_task(task):
         env.update(task['environment_variables'])
 
     return env
-

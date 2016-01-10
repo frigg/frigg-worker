@@ -1,4 +1,5 @@
 import pytest
+
 from frigg_worker.environment_variables import environment_variables_for_task
 
 

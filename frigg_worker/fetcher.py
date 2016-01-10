@@ -15,9 +15,10 @@ import requests
 from docker.manager import Docker
 
 import frigg_worker
-from .environment_variables import environment_variables_for_task
+
 from .builds import Build
 from .deployments import Deployment
+from .environment_variables import environment_variables_for_task
 from .errors import ApiError
 
 logger = logging.getLogger(__name__)
