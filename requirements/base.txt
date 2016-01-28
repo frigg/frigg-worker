@@ -3,4 +3,4 @@ docker-wrapper>=1.1,<1.2
 frigg-coverage>=1.1.1,<2.0.0
 frigg-settings>=3.1.1,<4.0.0
 pyyaml==3.11
-raven==5.8.1
+raven==5.10.2
